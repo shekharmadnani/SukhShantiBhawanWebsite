@@ -1,0 +1,15 @@
+{
+  "name": "sukh-shanti-bhawan-website",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Website for Brahma Kumaris Sukh Shanti Bhawan, Sector 115, Noida",
+  "scripts": {
+    "build": "node build.js",
+    "art": "node tools/make-art.js",
+    "check": "node build.js && node tools/check.js",
+    "measure": "node build.js && node tools/measure.js",
+    "test": "node build.js && node tools/check.js && node tools/measure.js",
+    "serve": "node build.js && node tools/serve.js"
+  },
+  "engines": { "node": ">=18" }
+}

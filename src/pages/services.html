@@ -1,0 +1,77 @@
+<!--meta
+{
+  "title": "Service Wings",
+  "nav": "services",
+  "heroTitle": "Service in the city",
+  "heroText": "Work the centre takes beyond its own walls — into schools, hospitals, offices and residential societies across Noida, always without charge.",
+  "description": "Brahma Kumaris service wings at Sukh Shanti Bhawan Noida: medical, education, youth, women's, business, senior citizens, art and social service."
+}
+-->
+
+{{> page-hero }}
+
+<section class="section">
+  <div class="container split split--wide-right">
+    <div class="split__media" data-reveal>
+      <div class="framed framed--left"><img src="/assets/img/services.svg" alt="A radiating mandala" loading="lazy" width="1200" height="800"></div>
+    </div>
+    <div data-reveal data-delay="1">
+      <span class="eyebrow">Why wings</span>
+      <h2>The same understanding, in different rooms</h2>
+      <div class="prose" style="margin-top:1.5rem">
+        <p class="lede">
+          What helps a surgeon steady themselves before an operation is not phrased the same way as
+          what helps a sixteen-year-old before an exam.
+        </p>
+        <p>
+          The Brahma Kumaris organise outward-facing work into wings — groups of students who already
+          work in a field and can speak to it without translation. A doctor talks to doctors. A
+          teacher talks to teachers. The understanding underneath is identical; only the vocabulary
+          changes.
+        </p>
+        <p>
+          Every session listed below is offered free. If you would like one for your school, hospital,
+          office, RWA or society anywhere in Noida, write to us and someone will call you back.
+        </p>
+      </div>
+      <div class="btn-row"><a class="btn btn--dark" href="/contact.html">Request a session</a></div>
+    </div>
+  </div>
+</section>
+
+<section class="section section--paper2">
+  <div class="container">
+    <div class="section-head section-head--center" data-reveal>
+      <span class="eyebrow eyebrow--center">The wings</span>
+      <h2>Where this centre serves</h2>
+    </div>
+    <div class="grid grid--3">
+      {{#each site.wings}}
+      <div class="card" data-reveal data-delay="{{ @index }}">
+        <h3>{{ name }}</h3>
+        <p>{{ text }}</p>
+      </div>
+      {{/each}}
+    </div>
+  </div>
+</section>
+
+<section class="section on-dark">
+  <div class="container container--mid text-center">
+    <div data-reveal>
+      <div class="ornament" style="margin-bottom:2rem"><svg aria-hidden="true"><use href="#i-om"/></svg></div>
+      <h2>Bring a session to your organisation</h2>
+      <p class="mt-2" style="font-size:var(--step-1); font-weight:300">
+        Typical requests: an hour on stress for a hospital's nursing staff, a values session for a
+        school assembly, a meditation morning for a residential society, a leadership workshop for a
+        management team. There is no fee, and no follow-up sales call — because there is nothing to sell.
+      </p>
+      <div class="btn-row" style="justify-content:center">
+        <a class="btn btn--primary" href="/contact.html">Write to the centre</a>
+        <a class="btn btn--ghost-light" href="tel:{{ site.contact.phoneHref }}">{{ site.contact.phone }}</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+{{> cta-band }}

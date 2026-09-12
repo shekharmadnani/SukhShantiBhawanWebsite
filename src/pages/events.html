@@ -1,0 +1,66 @@
+<!--meta
+{
+  "title": "Events",
+  "nav": "events",
+  "heroTitle": "Festivals and gatherings",
+  "heroText": "The centre's year turns around a handful of days. All of them are open to the public, and none of them require an invitation.",
+  "description": "Festivals and public programmes at Sukh Shanti Bhawan, Sector 115 Noida — Shiv Jayanti, International Day of Yoga, Raksha Bandhan and Deepavali."
+}
+-->
+
+{{> page-hero }}
+
+<section class="section">
+  <div class="container">
+    <div class="section-head" data-reveal>
+      <span class="eyebrow">Through the year</span>
+      <h2>Days worth travelling for</h2>
+      <p>Dates follow the Indian calendar and shift each year. Call the centre, or watch this page, for the exact dates and timings.</p>
+    </div>
+    <div class="grid grid--2">
+      {{#each site.events}}
+      <article class="course-card" data-reveal data-delay="{{ @index }}">
+        <div class="course-card__media"><img src="/assets/img/{{ art }}.svg" alt="" loading="lazy" width="800" height="500"></div>
+        <div class="course-card__body">
+          <div class="course-card__meta"><svg style="width:1rem;height:1rem" aria-hidden="true"><use href="#i-calendar"/></svg><span>{{ when }}</span></div>
+          <h3>{{ title }}</h3>
+          <p>{{ text }}</p>
+        </div>
+      </article>
+      {{/each}}
+    </div>
+  </div>
+</section>
+
+<section class="section section--paper2">
+  <div class="container container--mid">
+    <div class="section-head section-head--center" data-reveal>
+      <span class="eyebrow eyebrow--center">Every week</span>
+      <h2>The ordinary calendar</h2>
+      <p>Festivals are the exception. Most of what the centre does, it does quietly, every day.</p>
+    </div>
+    <div class="table-scroll" data-reveal data-delay="1">
+      <table class="timetable">
+        <caption>{{ site.timings.note }}</caption>
+        <thead><tr><th scope="col">Session</th><th scope="col">Time</th><th scope="col">Days</th><th scope="col">What it is</th></tr></thead>
+        <tbody>
+          {{#each site.timings.daily}}
+          <tr><th scope="row">{{ name }}</th><td class="time">{{ time }}</td><td>{{ days }}</td><td class="detail">{{ detail }}</td></tr>
+          {{/each}}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container container--narrow">
+    <figure class="quote" data-reveal>
+      <div class="quote__mark" aria-hidden="true">&ldquo;</div>
+      <blockquote>A festival is only a day the rest of the year is allowed to borrow from.</blockquote>
+      <figcaption>Said at the centre, on a Deepavali evening</figcaption>
+    </figure>
+  </div>
+</section>
+
+{{> cta-band }}

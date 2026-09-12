@@ -1,0 +1,116 @@
+<!--meta
+{
+  "title": "Visit Us",
+  "nav": "contact",
+  "heroTitle": "Come and see",
+  "heroText": "Sector 115, Noida. Shoes off at the door, tea afterwards, and nothing expected of you.",
+  "description": "Visit Brahma Kumaris Sukh Shanti Bhawan, Sector 115, Noida — address, directions, timings, phone and email. Everyone is welcome, and everything is free."
+}
+-->
+
+{{> page-hero }}
+
+<section class="section">
+  <div class="container split split--wide-right">
+    <div data-reveal>
+      <span class="eyebrow">Find us</span>
+      <h2>Where and when</h2>
+      <ul class="contact-list mt-2" style="margin-top:2rem">
+        <li>
+          <svg aria-hidden="true"><use href="#i-pin"/></svg>
+          <div>
+            <h4>Address</h4>
+            <address style="font-style:normal">{{#each site.contact.addressLines}}{{ value }}<br>{{/each}}</address>
+            <p style="margin-top:.5rem"><a href="{{ site.contact.mapsLink }}" target="_blank" rel="noopener">Open in Google Maps</a></p>
+          </div>
+        </li>
+        <li>
+          <svg aria-hidden="true"><use href="#i-phone"/></svg>
+          <div><h4>Telephone</h4><p><a href="tel:{{ site.contact.phoneHref }}">{{ site.contact.phone }}</a></p></div>
+        </li>
+        <li>
+          <svg aria-hidden="true"><use href="#i-mail"/></svg>
+          <div><h4>Email</h4><p><a href="mailto:{{ site.contact.email }}">{{ site.contact.email }}</a></p></div>
+        </li>
+        <li>
+          <svg aria-hidden="true"><use href="#i-clock"/></svg>
+          <div>
+            <h4>Best time for a first visit</h4>
+            <p>{{ site.timings.daily.2.name }}, {{ site.timings.daily.2.time }}, {{ site.timings.daily.2.days }}.</p>
+          </div>
+        </li>
+      </ul>
+
+      <h3 style="margin-top:3rem">Getting here</h3>
+      <ul class="contact-list" style="margin-top:1.5rem">
+        {{#each site.contact.directions}}
+        <li>
+          <svg aria-hidden="true"><use href="#i-arrow"/></svg>
+          <div><h4>{{ mode }}</h4><p>{{ detail }}</p></div>
+        </li>
+        {{/each}}
+      </ul>
+    </div>
+
+    <div data-reveal data-delay="1">
+      <div class="card" style="padding:clamp(1.75rem,3.5vw,2.75rem)">
+        <span class="eyebrow">Write to us</span>
+        <h3 style="margin-bottom:.5rem">Send a message</h3>
+        <p style="margin-bottom:1.5rem">Tell us what you are looking for and someone from the centre will reply. There is no mailing list.</p>
+        <form class="form" data-contact-form data-mailto="{{ site.contact.email }}">
+          <div class="field--row">
+            <div class="field">
+              <label for="name">Your name</label>
+              <input id="name" name="Name" type="text" autocomplete="name" required>
+            </div>
+            <div class="field">
+              <label for="phone">Phone</label>
+              <input id="phone" name="Phone" type="tel" autocomplete="tel">
+            </div>
+          </div>
+          <div class="field">
+            <label for="email">Email</label>
+            <input id="email" name="Email" type="email" autocomplete="email" required>
+          </div>
+          <div class="field">
+            <label for="subject">What is this about?</label>
+            <select id="subject" name="subject">
+              <option>Visiting for the first time</option>
+              <option>The seven-day foundation course</option>
+              <option>A short course or workshop</option>
+              <option>A session for our school or organisation</option>
+              <option>Something else</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="message">Message</label>
+            <textarea id="message" name="Message" rows="5"></textarea>
+          </div>
+          <button class="btn btn--primary" type="submit">Send message</button>
+          <p class="form__note">
+            Prefer to talk? Call <a href="tel:{{ site.contact.phoneHref }}" style="color:var(--deep-700)">{{ site.contact.phone }}</a>
+            or message us on <a href="https://wa.me/{{ site.contact.whatsapp }}" style="color:var(--deep-700)" target="_blank" rel="noopener">WhatsApp</a>.
+          </p>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section section--tight section--paper2">
+  <div class="container">
+    <div class="map-frame" data-reveal>
+      <iframe src="{{ site.contact.mapsEmbed }}" title="Map showing Sector 115, Noida" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container container--narrow">
+    <figure class="quote" data-reveal>
+      <div class="quote__mark" aria-hidden="true">&ldquo;</div>
+      <blockquote>{{ site.timings.firstVisit }}</blockquote>
+      <figcaption>Sukh Shanti Bhawan<span>{{ site.locality }}</span></figcaption>
+    </figure>
+  </div>
+</section>

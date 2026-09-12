@@ -1,0 +1,74 @@
+<!--meta
+{
+  "title": "Courses",
+  "nav": "courses",
+  "heroTitle": "Courses and workshops",
+  "heroText": "Every course listed here is free, taught by volunteers, and open to anyone — regardless of faith, background or previous experience.",
+  "description": "Free courses at Sukh Shanti Bhawan Noida: the seven-day Rajyoga foundation course, positive thinking, stress-free living, self-management leadership and more."
+}
+-->
+
+{{> page-hero }}
+
+<section class="section">
+  <div class="container">
+    <div class="section-head" data-reveal>
+      <span class="eyebrow">Start here</span>
+      <h2>The foundation course</h2>
+      <p>Everything else at the centre assumes these seven hours. They are worth taking slowly.</p>
+    </div>
+    {{#each site.courses}}{{#if featured}}
+    <article class="course-card course-card--featured" id="{{ slug }}" data-reveal>
+      <div class="course-card__media"><img src="/assets/img/{{ art }}.svg" alt="" loading="lazy" width="900" height="620"></div>
+      <div class="course-card__body">
+        <div class="course-card__meta"><span>{{ duration }}</span><span>{{ format }}</span><span>No charge</span></div>
+        <h3>{{ title }}</h3>
+        <p>{{ summary }}</p>
+        <ul class="course-card__list">{{#each covers}}<li>{{ value }}</li>{{/each}}</ul>
+        <div class="btn-row"><a class="btn btn--dark" href="/contact.html">Ask for a start date</a></div>
+      </div>
+    </article>
+    {{/if}}{{/each}}
+  </div>
+</section>
+
+<section class="section section--paper2">
+  <div class="container">
+    <div class="section-head" data-reveal>
+      <span class="eyebrow">And then</span>
+      <h2>Short courses</h2>
+      <p>Shorter workshops, run through the year at the centre and taken out to schools and organisations on request.</p>
+    </div>
+    <div class="grid grid--3">
+      {{#each site.courses}}{{#unless featured}}
+      <article class="course-card" id="{{ slug }}" data-reveal data-delay="{{ @index }}">
+        <div class="course-card__media"><img src="/assets/img/{{ art }}.svg" alt="" loading="lazy" width="800" height="500"></div>
+        <div class="course-card__body">
+          <div class="course-card__meta"><span>{{ duration }}</span></div>
+          <h3>{{ title }}</h3>
+          <p>{{ summary }}</p>
+          <ul class="course-card__list">{{#each covers}}<li>{{ value }}</li>{{/each}}</ul>
+          <div class="course-card__meta" style="margin-top:auto; padding-top:1rem">{{ format }}</div>
+        </div>
+      </article>
+      {{/unless}}{{/each}}
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container container--mid">
+    <div class="section-head section-head--center" data-reveal>
+      <span class="eyebrow eyebrow--center">Practicalities</span>
+      <h2>How enrolling works</h2>
+    </div>
+    <ol class="numbered" data-reveal data-delay="1">
+      <li><span class="n">01</span><div><h4>Call, write, or simply arrive</h4><p>An evening meditation is the easiest first contact. If you would rather arrange things beforehand, call {{ site.contact.phone }} or write to {{ site.contact.email }}.</p></div></li>
+      <li><span class="n">02</span><div><h4>A teacher is set aside for you</h4><p>The foundation course is usually taught one to one, at an hour that fits around your work. Small groups run when several people start together.</p></div></li>
+      <li><span class="n">03</span><div><h4>Seven sessions, at your pace</h4><p>Daily, on alternate days, or weekly. Missing one is not a problem; the sessions are picked up where they were left.</p></div></li>
+      <li><span class="n">04</span><div><h4>Afterwards, nothing is required</h4><p>Some people join the morning class. Some come only on Sundays. Some take what they have learned and are never seen again — which is a perfectly good outcome.</p></div></li>
+    </ol>
+  </div>
+</section>
+
+{{> cta-band }}

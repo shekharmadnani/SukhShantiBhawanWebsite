@@ -1,0 +1,120 @@
+<!--meta
+{
+  "title": "About",
+  "nav": "about",
+  "heroTitle": "A house of happiness and peace",
+  "heroText": "Sukh Shanti Bhawan is a centre of the Brahma Kumaris in Sector 115, Noida — run by its students, open to everyone, and free in every respect.",
+  "description": "About Brahma Kumaris Sukh Shanti Bhawan, Sector 115 Noida — the centre, the organisation behind it, and the eight values it is built on."
+}
+-->
+
+{{> page-hero }}
+
+<section class="section">
+  <div class="container split split--wide-right">
+    <div class="split__media" data-reveal>
+      <div class="framed framed--left">
+        <img src="/assets/img/about-centre.svg" alt="A mandala in daylight" loading="lazy" width="1100" height="820">
+      </div>
+    </div>
+    <div data-reveal data-delay="1">
+      <span class="eyebrow">The centre</span>
+      <h2>What you will find in Sector 115</h2>
+      <div class="prose" style="margin-top:1.5rem">
+        <p class="lede">
+          A room with light in it, shoes at the door, and people who will not ask you why you came.
+        </p>
+        <p>
+          The centre keeps a simple rhythm. It opens before dawn for the quietest meditation of the
+          day, holds a study class each morning, and opens again in the evening for anyone finishing
+          work. Between those hours it is used for courses, for conversations, and by people who
+          simply want somewhere to sit.
+        </p>
+        <p>
+          Most of what happens here happens because someone local offered to make it happen. The
+          teachers are not paid. The building is kept by the people who use it. When a school or a
+          hospital in Noida asks for a session on stress or values, someone from this centre goes —
+          and no invoice follows.
+        </p>
+        <p>
+          <strong>You do not need to be a Brahma Kumari to be welcome here.</strong> A large number of
+          the people who come each week study nothing, join nothing, and simply sit in the evening
+          meditation because it helps.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section on-dark">
+  <div class="container">
+    <div class="section-head section-head--center" data-reveal>
+      <span class="eyebrow eyebrow--center">The organisation</span>
+      <h2>Brahma Kumaris</h2>
+      <p>An international spiritual movement, taught and led largely by women since 1937.</p>
+    </div>
+  </div>
+  <div class="stats" data-reveal data-delay="1">
+    {{#each site.org_facts}}
+    <div class="stat">
+      <div class="stat__value">{{ value }}</div>
+      <div class="stat__label">{{ label }}</div>
+    </div>
+    {{/each}}
+  </div>
+  <div class="container split split--wide-left" style="margin-top:clamp(3rem,6vw,5rem)">
+    <div data-reveal>
+      <div class="prose">
+        <p class="lede" style="color:var(--ink-on-dark)">
+          The Brahma Kumaris began in 1937 in Hyderabad, Sindh, when a successful diamond merchant
+          named Dada Lekhraj gave away his business and placed the whole of it in the hands of a
+          committee of young women.
+        </p>
+        <p>
+          That decision — in that decade, in that place — is still the most striking fact about the
+          organisation. Nearly ninety years later it remains led by women, and its administrative
+          headquarters at Mount Abu in Rajasthan is one of the largest spiritual campuses in the world.
+        </p>
+        <p>
+          Today there are more than eight thousand five hundred centres in over a hundred and ten
+          countries. The Brahma Kumaris hold general consultative status with the Economic and Social
+          Council of the United Nations and consultative status with UNICEF. Every course taught at
+          every one of those centres is free.
+        </p>
+        <p>
+          Students follow a simple discipline: a vegetarian diet without onion and garlic, no alcohol
+          or tobacco, celibacy, and the early-morning meditation known as Amrit Vela. None of it is
+          asked of a visitor.
+        </p>
+      </div>
+      <div class="btn-row">
+        <a class="btn btn--ghost-light" href="https://www.brahmakumaris.com" target="_blank" rel="noopener">The global website</a>
+      </div>
+    </div>
+    <div class="split__media" data-reveal data-delay="1">
+      <div class="framed">
+        <img src="/assets/img/about-org.svg" alt="Still water under a rising form" loading="lazy" width="1100" height="820">
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-head section-head--center" data-reveal>
+      <span class="eyebrow eyebrow--center">Foundations</span>
+      <h2>Eight values, and what they actually mean</h2>
+      <p>These are not aspirations printed on a wall. They are the qualities the practice is meant to return to you.</p>
+    </div>
+    <div class="grid grid--4">
+      {{#each site.values}}
+      <div class="card" data-reveal data-delay="{{ @index }}">
+        <h4>{{ name }}</h4>
+        <p>{{ text }}</p>
+      </div>
+      {{/each}}
+    </div>
+  </div>
+</section>
+
+{{> cta-band }}

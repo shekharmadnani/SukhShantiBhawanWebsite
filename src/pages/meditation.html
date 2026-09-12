@@ -1,0 +1,122 @@
+<!--meta
+{
+  "title": "Rajyoga Meditation",
+  "nav": "meditation",
+  "heroTitle": "Rajyoga meditation",
+  "heroText": "Open-eyed, unhurried and portable. No mantra, no posture, no incense — just your attention, turned around.",
+  "description": "What Rajyoga meditation is, how it differs from other practices, what it does over time, and how to learn it free at Sukh Shanti Bhawan, Sector 115 Noida."
+}
+-->
+
+{{> page-hero }}
+
+<section class="section">
+  <div class="container container--narrow">
+    <div class="prose" data-reveal>
+      <span class="eyebrow">The practice</span>
+      <h2 style="margin-bottom:1.5rem">What it is</h2>
+      <p class="lede">
+        Raja Yoga means the sovereign union — the yoga of the mind rather than the body. It is not a
+        physical discipline, and it has no relationship to postures or breathing exercises.
+      </p>
+      <p>
+        The practice begins with a single claim, which you are invited to test rather than believe:
+        that you are not the body you are sitting in, nor the stream of thought passing through it,
+        but the point of conscious light that is aware of both. Meditation is the act of standing in
+        that awareness instead of in the noise.
+      </p>
+      <p>
+        From there, attention turns outward again — towards the Supreme Soul, experienced not as a
+        figure or an image but as a source of light and peace with which a relationship is possible.
+        For some people that relationship is the whole of it. For others, the self-understanding
+        comes first and the rest arrives later. Both are ordinary.
+      </p>
+
+      <h3>Why the eyes stay open</h3>
+      <p>
+        Most meditation traditions close the eyes. Rajyoga keeps them open — softly, resting on a
+        point of light or on nothing in particular — for a practical reason. A state that only exists
+        behind closed eyelids ends when you open them. Practised this way, the same quality of
+        attention can be held in a meeting, in traffic, at a hospital bedside, in an argument. That
+        is the entire point of it.
+      </p>
+
+      <h3>What changes</h3>
+      <p>
+        Nothing dramatic, and not quickly. What people report, in roughly this order: sleep improves;
+        the gap between provocation and reaction widens; old resentments start to feel expensive to
+        keep carrying; decisions get easier because there is less noise around them. None of that is
+        guaranteed and none of it is the goal. It is simply what tends to happen when the mind stops
+        being run at full volume.
+      </p>
+    </div>
+  </div>
+</section>
+
+<section class="section section--paper2">
+  <div class="container">
+    <div class="section-head section-head--center" data-reveal>
+      <span class="eyebrow eyebrow--center">Try it now</span>
+      <h2>Three minutes, wherever you are</h2>
+      <p>You do not have to wait until you can visit. This is the shape of the practice, in miniature.</p>
+    </div>
+    <div class="container--mid" style="margin-inline:auto">
+      <ol class="numbered" data-reveal data-delay="1">
+        <li><span class="n">01</span><div><h4>Sit, and let the eyes soften</h4><p>Upright but not rigid. Keep the eyes open, the gaze level and unfocused. Do not try to empty the mind — it will not work, and the trying is itself more noise.</p></div></li>
+        <li><span class="n">02</span><div><h4>Find the one who is watching</h4><p>Thoughts continue. Instead of following them, notice that something is aware of them. Rest your attention there, at a point just behind the forehead.</p></div></li>
+        <li><span class="n">03</span><div><h4>Give it a single thought</h4><p>Hold one line, slowly: <em>I am a peaceful being.</em> Not as an affirmation to believe, but as a direction to look in.</p></div></li>
+        <li><span class="n">04</span><div><h4>Let the light come towards you</h4><p>If it helps, imagine a steady source of light ahead of you, and let it reach you rather than reaching for it. Stay a minute longer than is comfortable.</p></div></li>
+        <li><span class="n">05</span><div><h4>Stand up slowly, and carry it</h4><p>Return to what you were doing without a break in attention. Repeat for one minute, several times a day. That repetition — not the length of any single sitting — is what changes things.</p></div></li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<section class="section on-dark">
+  <div class="container split split--wide-right">
+    <div class="split__media split__media--first" data-reveal>
+      <div class="framed framed--left">
+        <img src="/assets/img/meditation.svg" alt="A seated figure in meditation" loading="lazy" width="1200" height="900">
+      </div>
+    </div>
+    <div data-reveal data-delay="1">
+      <span class="eyebrow">Common questions</span>
+      <h2>Before you worry about it</h2>
+      <div class="accordion mt-2">
+        {{#each site.faqs}}
+        <div class="accordion__item">
+          <h3 style="margin:0">
+            <button class="accordion__btn" type="button" data-accordion-btn aria-expanded="false" aria-controls="med-faq-{{ @n }}">
+              <span>{{ q }}</span><span class="accordion__sign" aria-hidden="true"></span>
+            </button>
+          </h3>
+          <div class="accordion__panel" id="med-faq-{{ @n }}" data-open="false"><div><p>{{ a }}</p></div></div>
+        </div>
+        {{/each}}
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="timings">
+  <div class="container container--mid">
+    <div class="section-head section-head--center" data-reveal>
+      <span class="eyebrow eyebrow--center">Timings</span>
+      <h2>Practise with others</h2>
+      <p>{{ site.timings.note }}</p>
+    </div>
+    <div class="table-scroll" data-reveal data-delay="1">
+      <table class="timetable">
+        <caption>Regular sessions at Sukh Shanti Bhawan, Sector 115.</caption>
+        <thead><tr><th scope="col">Session</th><th scope="col">Time</th><th scope="col">Days</th><th scope="col">What it is</th></tr></thead>
+        <tbody>
+          {{#each site.timings.daily}}
+          <tr><th scope="row">{{ name }}</th><td class="time">{{ time }}</td><td>{{ days }}</td><td class="detail">{{ detail }}</td></tr>
+          {{/each}}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+{{> cta-band }}

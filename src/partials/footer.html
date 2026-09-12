@@ -1,0 +1,56 @@
+<footer class="footer">
+  <div class="container footer__top">
+    <div>
+      <span class="footer__brand">
+        <span style="color: var(--gold-300)">{{> logo }}</span>
+        <span class="brand__text">
+          <span class="brand__name">{{ site.name }}</span>
+          <span class="brand__sub">{{ site.org }} · {{ site.locality }}</span>
+        </span>
+      </span>
+      <p class="footer__blurb">{{ site.footer.blurb }}</p>
+      <div class="social">
+        {{#each site.social}}
+        <a href="{{ url }}" aria-label="{{ name }}" rel="noopener"{{#if external}} target="_blank"{{/if}}><svg aria-hidden="true"><use href="#i-{{ icon }}"/></svg></a>
+        {{/each}}
+      </div>
+    </div>
+
+    <div>
+      <h4>Explore</h4>
+      <ul class="footer__list">
+        {{#each nav}}
+        <li><a href="{{ href }}">{{ label }}</a></li>
+        {{/each}}
+      </ul>
+    </div>
+
+    <div>
+      <h4>Brahma Kumaris</h4>
+      <ul class="footer__list">
+        {{#each site.footer.parentLinks}}
+        <li><a href="{{ href }}" target="_blank" rel="noopener">{{ label }}</a></li>
+        {{/each}}
+        <li><a href="/about.html">About the organisation</a></li>
+        <li><a href="/faq.html">Questions</a></li>
+      </ul>
+    </div>
+
+    <div>
+      <h4>Visit</h4>
+      <address style="font-style:normal; line-height:1.8">
+        {{#each site.contact.addressLines}}{{ value }}<br>{{/each}}
+      </address>
+      <ul class="footer__list" style="margin-top:1.1rem">
+        <li><a href="tel:{{ site.contact.phoneHref }}">{{ site.contact.phone }}</a></li>
+        <li><a href="mailto:{{ site.contact.email }}">{{ site.contact.email }}</a></li>
+        <li><a href="{{ site.contact.mapsLink }}" target="_blank" rel="noopener">Open in Google Maps</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="container footer__bottom">
+    <p>&copy; <span data-year>2026</span> {{ site.fullName }}. Every class and course is offered free of charge.</p>
+    <p class="footer__om">{{ site.greetingDev }} · {{ site.greeting }}</p>
+  </div>
+</footer>

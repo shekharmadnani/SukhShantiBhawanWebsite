@@ -1,0 +1,229 @@
+<!--meta
+{
+  "title": "Rajyoga Meditation in Noida",
+  "nav": "home",
+  "description": "Brahma Kumaris Sukh Shanti Bhawan, Sector 115, Noida. Free daily Rajyoga meditation, a seven-day foundation course, and courses in positive thinking and stress-free living. Everyone is welcome."
+}
+-->
+
+<section class="hero">
+  <div class="hero__bg"><img src="/assets/img/hero.svg" alt="" aria-hidden="true" fetchpriority="high"></div>
+  <div class="container hero__inner">
+    <span class="hero__greeting devanagari">{{ site.greetingDev }}</span>
+    <h1>A quiet place in Noida to <em>return to yourself</em></h1>
+    <p class="hero__sub">
+      Sukh Shanti Bhawan is a Brahma Kumaris centre in Sector 115. We teach Rajyoga meditation —
+      open-eyed, without ritual or mantra — to anyone who asks. There is never a fee.
+    </p>
+    <div class="btn-row">
+      <a class="btn btn--primary" href="/courses.html#foundation">Begin the free course</a>
+      <a class="btn btn--ghost-light" href="/contact.html">Visit the centre</a>
+    </div>
+  </div>
+</section>
+
+<div class="container quickcards">
+  <div class="quickcards__grid" data-reveal>
+    <a class="quickcard" href="/meditation.html#timings">
+      <svg class="quickcard__icon" aria-hidden="true"><use href="#i-clock"/></svg>
+      <h3>Daily meditation</h3>
+      <p>Morning class at {{ site.timings.daily.1.time }}, evening meditation at {{ site.timings.daily.2.time }}. Walk in — no booking needed.</p>
+      <span class="quickcard__meta">See all timings</span>
+    </a>
+    <a class="quickcard" href="/courses.html#foundation">
+      <svg class="quickcard__icon" aria-hidden="true"><use href="#i-book"/></svg>
+      <h3>Seven-day course</h3>
+      <p>The Rajyoga foundation course — seven unhurried hours that teach you to meditate anywhere.</p>
+      <span class="quickcard__meta">Free, always</span>
+    </a>
+    <a class="quickcard" href="/contact.html">
+      <svg class="quickcard__icon" aria-hidden="true"><use href="#i-pin"/></svg>
+      <h3>Find us</h3>
+      <p>{{ site.contact.addressShort }}. Free parking, and a cup of tea when you arrive.</p>
+      <span class="quickcard__meta">Directions</span>
+    </a>
+  </div>
+</div>
+
+<section class="section">
+  <div class="container split split--wide-right">
+    <div class="split__media" data-reveal>
+      <div class="framed framed--left">
+        <img src="/assets/img/welcome.svg" alt="A lotus opening in first light" loading="lazy" width="900" height="1120">
+      </div>
+    </div>
+    <div data-reveal data-delay="1">
+      <span class="eyebrow">Welcome</span>
+      <h2>Peace is not somewhere else</h2>
+      <div class="prose mt-0" style="margin-top:1.5rem">
+        <p class="lede">
+          Most people arrive here carrying something — a job that will not let go, a loss, a
+          restlessness they cannot name. They expect to be given a belief. Instead they are given
+          ten minutes of silence, and their own mind back.
+        </p>
+        <p>
+          <strong>Sukh Shanti Bhawan</strong> — the house of happiness and peace — is one of more
+          than eight thousand Brahma Kumaris centres around the world. What is taught here is not a
+          religion to join. It is an understanding of the self, and a meditation practised with the
+          eyes open, so that it can be carried into an ordinary Tuesday.
+        </p>
+        <p>
+          The centre is run entirely by its own students. Nothing is sold, no fee is taken, and no
+          one will ask you to become anything you are not.
+        </p>
+      </div>
+      <div class="btn-row">
+        <a class="btn btn--ghost" href="/about.html">About the centre</a>
+        <a class="link-arrow" href="/meditation.html" style="align-self:center; margin-left:.5rem">
+          What is Rajyoga? <svg aria-hidden="true"><use href="#i-arrow"/></svg>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section section--paper2">
+  <div class="container">
+    <div class="section-head section-head--center" data-reveal>
+      <span class="eyebrow eyebrow--center">What happens here</span>
+      <h2>Four ways to begin</h2>
+      <p>Everything below is open to anyone who walks in, and every one of them is free.</p>
+    </div>
+    <div class="grid grid--4">
+      {{#each site.offerings}}
+      <a class="card card--link" href="{{ href }}" data-reveal data-delay="{{ @index }}">
+        <svg class="card__icon" aria-hidden="true"><use href="#i-{{ icon }}"/></svg>
+        <h3>{{ title }}</h3>
+        <p>{{ text }}</p>
+        <span class="card__foot link-arrow">More <svg aria-hidden="true"><use href="#i-arrow"/></svg></span>
+      </a>
+      {{/each}}
+    </div>
+  </div>
+</section>
+
+<section class="section on-dark">
+  <div class="container split split--wide-left">
+    <div data-reveal>
+      <span class="eyebrow">Rajyoga meditation</span>
+      <h2>Meditation with your eyes open</h2>
+      <p class="mt-2" style="font-size:var(--step-1); font-weight:300; line-height:1.65">
+        Rajyoga asks for no posture, no chanting and no incense. You sit as you are, keep your eyes
+        gently open, and turn your attention to the one who is looking. That is the whole technique.
+        Everything else is practice.
+      </p>
+      <ol class="numbered mt-3">
+        <li><span class="n">01</span><div><h4>You are not your thoughts</h4><p>The first shift is noticing that something is watching the thinking. That something is you.</p></div></li>
+        <li><span class="n">02</span><div><h4>Peace is the original state</h4><p>It is not produced by the practice. It is what remains when the noise is set down.</p></div></li>
+        <li><span class="n">03</span><div><h4>A relationship, not a ritual</h4><p>Attention turns towards the Supreme — experienced as light, and as a relationship that asks nothing.</p></div></li>
+        <li><span class="n">04</span><div><h4>Carried into the day</h4><p>Because the eyes stay open, the state survives the commute, the meeting and the argument.</p></div></li>
+      </ol>
+      <div class="btn-row">
+        <a class="btn btn--primary" href="/meditation.html">How to learn</a>
+      </div>
+    </div>
+    <div class="split__media" data-reveal data-delay="1">
+      <div class="framed">
+        <img src="/assets/img/meditation.svg" alt="A seated figure in meditation, surrounded by rings of light" loading="lazy" width="1200" height="900">
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-head" data-reveal>
+      <span class="eyebrow">Where everyone starts</span>
+      <h2>The foundation course</h2>
+      <p>Seven conversations, an hour each, at a pace that suits you. One to one, or in a small group.</p>
+    </div>
+    {{#each site.courses}}{{#if featured}}
+    <article class="course-card course-card--featured" id="foundation" data-reveal>
+      <div class="course-card__media"><img src="/assets/img/{{ art }}.svg" alt="" loading="lazy" width="900" height="620"></div>
+      <div class="course-card__body">
+        <div class="course-card__meta"><span>{{ duration }}</span><span>{{ format }}</span><span>No charge</span></div>
+        <h3>{{ title }}</h3>
+        <p>{{ summary }}</p>
+        <ul class="course-card__list">
+          {{#each covers}}<li>{{ value }}</li>{{/each}}
+        </ul>
+        <div class="btn-row">
+          <a class="btn btn--dark" href="/contact.html">Ask for a start date</a>
+          <a class="btn btn--ghost" href="/courses.html">All courses</a>
+        </div>
+      </div>
+    </article>
+    {{/if}}{{/each}}
+  </div>
+</section>
+
+<section class="section section--paper2" id="timings">
+  <div class="container container--mid">
+    <div class="section-head section-head--center" data-reveal>
+      <span class="eyebrow eyebrow--center">Timings</span>
+      <h2>When to come</h2>
+      <p>{{ site.timings.note }}</p>
+    </div>
+    <div class="table-scroll" data-reveal data-delay="1">
+      <table class="timetable">
+        <caption>Regular sessions at Sukh Shanti Bhawan, Sector 115.</caption>
+        <thead>
+          <tr><th scope="col">Session</th><th scope="col">Time</th><th scope="col">Days</th><th scope="col">What it is</th></tr>
+        </thead>
+        <tbody>
+          {{#each site.timings.daily}}
+          <tr>
+            <th scope="row">{{ name }}</th>
+            <td class="time">{{ time }}</td>
+            <td>{{ days }}</td>
+            <td class="detail">{{ detail }}</td>
+          </tr>
+          {{/each}}
+        </tbody>
+      </table>
+    </div>
+    <p class="text-center mt-3"><a class="link-arrow" href="/contact.html">Plan your first visit <svg aria-hidden="true"><use href="#i-arrow"/></svg></a></p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-head section-head--center" data-reveal>
+      <span class="eyebrow eyebrow--center">In their words</span>
+      <h2>What people say afterwards</h2>
+    </div>
+    <div class="reflections">
+      {{#each site.reflections}}
+      <figure class="reflection" data-reveal data-delay="{{ @index }}" style="margin:0">
+        <p>{{ quote }}</p>
+        <cite>{{ by }}<span>{{ meta }}</span></cite>
+      </figure>
+      {{/each}}
+    </div>
+  </div>
+</section>
+
+<section class="section section--paper2">
+  <div class="container">
+    <div class="section-head" data-reveal>
+      <span class="eyebrow">Through the year</span>
+      <h2>Festivals and gatherings</h2>
+      <p>The centre's year turns around a handful of days that are worth travelling for. All are open to the public.</p>
+    </div>
+    <div class="grid grid--4">
+      {{#each site.events}}
+      <article class="course-card" data-reveal data-delay="{{ @index }}">
+        <div class="course-card__media"><img src="/assets/img/{{ art }}.svg" alt="" loading="lazy" width="800" height="500"></div>
+        <div class="course-card__body">
+          <div class="course-card__meta"><span>{{ when }}</span></div>
+          <h4>{{ title }}</h4>
+          <p>{{ text }}</p>
+        </div>
+      </article>
+      {{/each}}
+    </div>
+    <p class="text-center mt-3"><a class="link-arrow" href="/events.html">See the full calendar <svg aria-hidden="true"><use href="#i-arrow"/></svg></a></p>
+  </div>
+</section>
+
+{{> cta-band }}

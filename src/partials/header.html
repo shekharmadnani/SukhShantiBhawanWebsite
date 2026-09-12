@@ -1,0 +1,62 @@
+<div class="topbar">
+  <div class="container topbar__inner">
+    <div class="topbar__group">
+      <span class="topbar__item"><svg aria-hidden="true"><use href="#i-clock"/></svg>Evening meditation daily, {{ site.timings.daily.2.time }}</span>
+      <span class="topbar__item topbar__hide-sm"><svg aria-hidden="true"><use href="#i-pin"/></svg>{{ site.locality }}</span>
+    </div>
+    <div class="topbar__group">
+      <a class="topbar__item" href="tel:{{ site.contact.phoneHref }}"><svg aria-hidden="true"><use href="#i-phone"/></svg>{{ site.contact.phone }}</a>
+      <a class="topbar__item topbar__hide-sm" href="mailto:{{ site.contact.email }}"><svg aria-hidden="true"><use href="#i-mail"/></svg>{{ site.contact.email }}</a>
+    </div>
+  </div>
+</div>
+
+<header class="header" data-header>
+  <div class="container header__inner">
+    <a class="brand" href="/" aria-label="{{ site.fullName }} — home">
+      <span style="color: var(--gold-600)">{{> logo }}</span>
+      <span class="brand__text">
+        <span class="brand__name">{{ site.name }}</span>
+        <span class="brand__sub">{{ site.org }} · {{ site.locality }}</span>
+      </span>
+    </a>
+
+    <nav class="nav" aria-label="Main">
+      <ul class="nav__list">
+        {{#each nav}}
+        <li><a class="nav__link" href="{{ href }}"{{#if active}} aria-current="page"{{/if}}>{{ label }}</a></li>
+        {{/each}}
+      </ul>
+    </nav>
+
+    <a class="btn btn--primary header__cta" href="/courses.html#foundation">Start free course</a>
+
+    <button class="nav-toggle" type="button" data-drawer-toggle aria-expanded="false" aria-controls="drawer" aria-label="Open menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<div class="drawer" id="drawer" data-drawer aria-hidden="true" aria-label="Menu">
+  <div class="container drawer__head">
+    <span class="brand">
+      <span style="color: var(--gold-600)">{{> logo }}</span>
+      <span class="brand__text"><span class="brand__name">{{ site.name }}</span></span>
+    </span>
+    <button class="drawer__close" type="button" data-drawer-close aria-label="Close menu">&times;</button>
+  </div>
+  <div class="container">
+    <ul class="drawer__list">
+      {{#each nav}}
+      <li><a href="{{ href }}"{{#if active}} aria-current="page"{{/if}}><span class="n">0{{ @n }}</span>{{ label }}</a></li>
+      {{/each}}
+    </ul>
+    <div class="drawer__foot">
+      <a class="btn btn--primary" href="/courses.html#foundation">Start free course</a>
+      <p style="margin-top:1.5rem; font-size:.9rem; color:var(--ink-3)">
+        <a href="tel:{{ site.contact.phoneHref }}" style="color:var(--deep-700)">{{ site.contact.phone }}</a><br>
+        <a href="mailto:{{ site.contact.email }}" style="color:var(--deep-700)">{{ site.contact.email }}</a>
+      </p>
+    </div>
+  </div>
+</div>

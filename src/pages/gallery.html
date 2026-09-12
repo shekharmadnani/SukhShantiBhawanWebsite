@@ -1,0 +1,41 @@
+<!--meta
+{
+  "title": "Gallery",
+  "nav": "gallery",
+  "heroTitle": "The centre, in pictures",
+  "heroText": "Mornings, classes, festivals and the ordinary quiet in between.",
+  "description": "Photographs of Sukh Shanti Bhawan, Sector 115 Noida — the meditation hall, classes, festivals and the garden."
+}
+-->
+
+{{> page-hero }}
+
+<section class="section">
+  <div class="container">
+    <div class="section-head section-head--center" data-reveal>
+      <span class="eyebrow eyebrow--center">Gallery</span>
+      <h2>A look inside</h2>
+      <p>Select any image to see it larger.</p>
+    </div>
+    <div class="gallery" data-reveal data-delay="1">
+      <button class="gallery__item" type="button" data-lightbox-open><img src="/assets/img/gallery-1.svg" alt="The meditation hall" loading="lazy" width="900" height="675"><figcaption>The meditation hall</figcaption></button>
+      <button class="gallery__item gallery__item--tall" type="button" data-lightbox-open><img src="/assets/img/gallery-2.svg" alt="Morning at the centre" loading="lazy" width="900" height="1350"><figcaption>Morning at the centre</figcaption></button>
+      <button class="gallery__item" type="button" data-lightbox-open><img src="/assets/img/gallery-3.svg" alt="A class in progress" loading="lazy" width="900" height="675"><figcaption>A class in progress</figcaption></button>
+      <button class="gallery__item" type="button" data-lightbox-open><img src="/assets/img/gallery-4.svg" alt="A festival evening" loading="lazy" width="900" height="675"><figcaption>A festival evening</figcaption></button>
+      <button class="gallery__item gallery__item--tall" type="button" data-lightbox-open><img src="/assets/img/gallery-5.svg" alt="The garden" loading="lazy" width="900" height="1350"><figcaption>The garden</figcaption></button>
+      <button class="gallery__item" type="button" data-lightbox-open><img src="/assets/img/gallery-6.svg" alt="The entrance" loading="lazy" width="900" height="675"><figcaption>The entrance</figcaption></button>
+      <button class="gallery__item" type="button" data-lightbox-open><img src="/assets/img/gallery-7.svg" alt="Amrit Vela, before dawn" loading="lazy" width="900" height="675"><figcaption>Amrit Vela, before dawn</figcaption></button>
+      <button class="gallery__item" type="button" data-lightbox-open><img src="/assets/img/gallery-8.svg" alt="A quiet corner" loading="lazy" width="900" height="675"><figcaption>A quiet corner</figcaption></button>
+    </div>
+  </div>
+</section>
+
+<div class="lightbox" data-lightbox aria-hidden="true" role="dialog" aria-modal="true" aria-label="Enlarged image">
+  <button class="lightbox__close" type="button" data-lightbox-close aria-label="Close">&times;</button>
+  <div>
+    <img src="" alt="">
+    <p class="lightbox__caption" data-lightbox-caption></p>
+  </div>
+</div>
+
+{{> cta-band }}

@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ title }} — {{ site.name }}, {{ site.locality }}</title>
+<meta name="description" content="{{ description }}">
+<link rel="canonical" href="{{ canonical }}">
+<meta name="theme-color" content="#0a2e3a">
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="{{ site.fullName }}">
+<meta property="og:title" content="{{ title }} — {{ site.name }}">
+<meta property="og:description" content="{{ description }}">
+<meta property="og:url" content="{{ canonical }}">
+<meta property="og:image" content="{{ ogImage }}">
+<meta name="twitter:card" content="summary_large_image">
+
+<link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/assets/img/og-default.png">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@300;400;500;600;700&family=Noto+Serif+Devanagari:wght@400;500&display=swap">
+<link rel="stylesheet" href="/assets/css/styles.css">
+<script>document.documentElement.classList.add("js");</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "PlaceOfWorship",
+  "name": "{{ site.fullName }}",
+  "alternateName": "{{ site.name }}",
+  "description": "{{ site.description }}",
+  "url": "{{ site.url }}",
+  "image": "{{ site.url }}/assets/img/og-default.png",
+  "telephone": "{{ site.contact.phone }}",
+  "email": "{{ site.contact.email }}",
+  "isAccessibleForFree": true,
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "Sector 115",
+    "addressLocality": "Noida",
+    "addressRegion": "Uttar Pradesh",
+    "postalCode": "201307",
+    "addressCountry": "IN"
+  },
+  "parentOrganization": {
+    "@type": "Organization",
+    "name": "Brahma Kumaris World Spiritual University",
+    "url": "https://www.brahmakumaris.com"
+  }
+}
+</script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+{{> icons }}
+{{> header }}
+<main id="main">
+{{{ content }}}
+</main>
+{{> footer }}
+<script src="/assets/js/main.js" defer></script>
+</body>
+</html>

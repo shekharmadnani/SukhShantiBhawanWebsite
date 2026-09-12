@@ -1,0 +1,39 @@
+<!--meta
+{
+  "title": "Questions",
+  "nav": "",
+  "heroTitle": "Questions people actually ask",
+  "heroText": "Usually before they come for the first time, and usually in a slightly apologetic voice. None of them are silly.",
+  "description": "Common questions about visiting Brahma Kumaris Sukh Shanti Bhawan, Sector 115 Noida — cost, religion, what to wear, and what happens in a class."
+}
+-->
+
+{{> page-hero }}
+
+<section class="section">
+  <div class="container container--narrow">
+    <div class="accordion" data-reveal>
+      {{#each site.faqs}}
+      <div class="accordion__item">
+        <h2 style="margin:0">
+          <button class="accordion__btn" type="button" data-accordion-btn aria-expanded="false" aria-controls="faq-{{ @n }}">
+            <span>{{ q }}</span><span class="accordion__sign" aria-hidden="true"></span>
+          </button>
+        </h2>
+        <div class="accordion__panel" id="faq-{{ @n }}" data-open="false"><div><p>{{ a }}</p></div></div>
+      </div>
+      {{/each}}
+    </div>
+
+    <div class="mt-3 text-center" data-reveal data-delay="1">
+      <div class="ornament" style="margin:3rem 0 2rem"><svg aria-hidden="true"><use href="#i-om"/></svg></div>
+      <h3>Something else on your mind?</h3>
+      <p style="margin-top:.75rem; color:var(--ink-3)">Call the centre, or write. Nobody will put you on a list.</p>
+      <div class="btn-row" style="justify-content:center">
+        <a class="btn btn--primary" href="/contact.html">Get in touch</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+{{> cta-band }}
