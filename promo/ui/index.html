@@ -98,7 +98,7 @@
 </head>
 <body>
 <header>
-  <h1>Promo Maker <small style="opacity:.6;font-weight:400;font-size:12px">v4</small></h1>
+  <h1>Promo Maker <small style="opacity:.6;font-weight:400;font-size:12px">v5</small></h1>
   <span class="total" id="total">—</span>
   <span class="spacer"></span>
   <button class="ghost" id="btnTemplates">Templates…</button>
@@ -375,7 +375,7 @@ $('#slotFile').onchange = async (e) => {
     else if (pickTarget === 'logo') promo.logo = { position: 'top-right', width: 0.15, margin: 0.045, opacity: 0.92, ...(promo.logo || {}), file: m.name };
     else if (promo.clips[pickTarget.clip]) setClipFile(promo.clips[pickTarget.clip], m.name);
     status('Ready'); changed();
-  } catch (err) { status('Import failed'); alert(`${f.name}: ${err.message}`); }
+  } catch (err) { status('Import failed'); alert(`Could not import ${f.name}\n\n${err.message}\n\nIf this keeps happening, copy this message (and any red text in the Promo Maker terminal window) to Claude.`); }
   pickTarget = null;
 };
 
@@ -392,7 +392,7 @@ async function upload(files) {
   for (const [i, f] of files.entries()) {
     status(`Importing ${f.name} (${i + 1}/${files.length})…`);
     try { await api('/api/media/' + encodeURIComponent(f.name), { method: 'POST', body: f }); }
-    catch (e) { alert(`${f.name}: ${e.message}`); }
+    catch (e) { alert(`Could not import ${f.name}\n\n${e.message}`); }
   }
   media = await api('/api/media');
   status('Ready'); renderAll(); validate();

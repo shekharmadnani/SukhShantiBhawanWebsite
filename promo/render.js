@@ -35,7 +35,7 @@ const FFPROBE = process.env.FFPROBE || 'ffprobe';
 const IMAGE_EXT = ['.jpg', '.jpeg', '.png', '.webp', '.bmp', '.gif', '.tif', '.tiff'];
 const VIDEO_EXT = ['.mp4', '.mov', '.m4v', '.mkv', '.webm', '.avi', '.mts', '.3gp'];
 const AUDIO_EXT = ['.mp3', '.m4a', '.aac', '.wav', '.ogg', '.oga', '.flac', '.opus', '.wma', '.aiff', '.aif',
-  '.amr', '.mka', '.weba', '.m4b', '.3ga', '.caf', '.ac3'];
+  '.amr', '.mka', '.weba', '.m4b', '.m4r', '.3ga', '.caf', '.ac3', '.mp2', '.mpga', '.mpeg'];
 
 const FRAMINGS = ['fill', 'fit-blur', 'fit', 'manual'];
 const TRANSITIONS = ['fade', 'fadeblack', 'fadewhite', 'dissolve', 'slideleft', 'slideup',

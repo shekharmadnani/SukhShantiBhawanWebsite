@@ -165,16 +165,32 @@ const server = http.createServer(async (req, res) => {
     if (p.startsWith('/api/media/') && req.method === 'POST') {
       // Raw upload: the body is the file. Never overwrite — add a number instead.
       let name = safeName(p.slice(11));
-      if (!name || !kindOf(name)) return json(res, 400, { error: 'Only images, videos and audio files can be imported.' });
+      if (!name || !kindOf(name)) {
+        const ext = path.extname(name).toLowerCase() || '(no extension)';
+        return json(res, 400, { error: `Files ending in ${ext} can't be imported. Use an image (JPG, PNG, WebP), ` +
+          'a video (MP4, MOV, WebM, MKV) or audio (MP3, M4A, WAV, WMA, AAC, OGG, Opus, FLAC). ' +
+          'You can convert other files with: ffmpeg -i yourfile output.mp3' });
+      }
       const ext = path.extname(name), stem = name.slice(0, -ext.length);
       for (let i = 2; fs.existsSync(path.join(MEDIA, name)); i++) name = `${stem}-${i}${ext}`;
       const dest = path.join(MEDIA, name);
       const tmp = dest + '.part';
       await new Promise((resolve, reject) => {
         const w = fs.createWriteStream(tmp);
-        req.pipe(w); w.on('finish', resolve); w.on('error', reject); req.on('error', reject);
+        // Wait for 'close', not 'finish': on Windows the file can't be renamed
+        // until its handle is really released.
+        req.pipe(w); w.on('close', resolve); w.on('error', reject); req.on('error', reject);
       });
-      fs.renameSync(tmp, dest);
+      // Antivirus scanners briefly lock new files on Windows; retry for ~5 s.
+      for (let attempt = 0; ; attempt++) {
+        try { fs.renameSync(tmp, dest); break; } catch (e) {
+          if (attempt >= 50 || !['EPERM', 'EBUSY', 'EACCES'].includes(e.code)) {
+            try { fs.unlinkSync(tmp); } catch { /* already gone */ }
+            throw new Error(`Could not save ${name}: ${e.message}`);
+          }
+          await new Promise((r) => setTimeout(r, 100));
+        }
+      }
       return json(res, 200, mediaInfo(name));
     }
     if (p.startsWith('/api/media/') && req.method === 'DELETE') {
@@ -206,7 +222,8 @@ const server = http.createServer(async (req, res) => {
 
     res.writeHead(404); res.end('Not found');
   } catch (e) {
-    json(res, 500, { error: e.message });
+    console.error(`${req.method} ${p}: ${e.stack || e.message}`); // so it can be copied from the terminal
+    if (!res.headersSent) json(res, 500, { error: e.message });
   }
 });
 
@@ -220,6 +237,6 @@ server.on('error', (e) => {
   throw e;
 });
 server.listen(PORT, '127.0.0.1', () => {
-  console.log(`Promo Maker v4: http://localhost:${PORT}`);
+  console.log(`Promo Maker v5: http://localhost:${PORT}`);
   console.log(`Workspace:   ${WS}`);
 });
