@@ -94,6 +94,19 @@ That is the whole language — it is documented at the top of `build.js`.
 Drop a file in `src/pages/`, give it front-matter, and add an entry to the `nav`
 array in `src/data/site.js`. The sitemap picks it up automatically.
 
+## Event promo videos
+
+`promo/` holds a separate small tool, the **Promo Maker**. It turns an ordered set of
+event images and video clips (poster, venue, speaker, highlights, registration) into a
+1080 × 1920 MP4 for WhatsApp Status, Reels and Shorts, with captions, logo, music and
+transitions. It needs FFmpeg, and it isn't part of the website build. See
+[`promo/README.md`](promo/README.md).
+
+```bash
+npm run promo:samples   # placeholder media to try it with
+npm run promo           # editor at http://localhost:8090
+```
+
 ## Images
 
 The artwork in `src/assets/img/` is generated — original mandala, lotus and lamp

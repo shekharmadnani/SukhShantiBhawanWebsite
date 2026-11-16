@@ -1,0 +1,605 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Promo Maker</title>
+<style>
+  :root {
+    --bg: #f4f1ea; --panel: #fffdf8; --ink: #1d2733; --muted: #66707c; --line: #e2dccf;
+    --accent: #1b4965; --accent-ink: #fff; --gold: #c99a2e; --danger: #a33a2a; --sel: #e8f0f5;
+    --radius: 10px;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 14px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--ink); }
+  header { display: flex; gap: 12px; align-items: center; padding: 10px 16px; background: var(--accent); color: var(--accent-ink); flex-wrap: wrap; }
+  header h1 { font-size: 17px; margin: 0 12px 0 0; font-weight: 600; letter-spacing: .2px; }
+  header .total { opacity: .85; font-variant-numeric: tabular-nums; }
+  header .spacer { flex: 1; }
+  button, select, input, textarea { font: inherit; color: inherit; }
+  button { border: 1px solid var(--line); background: #fff; border-radius: 8px; padding: 6px 12px; cursor: pointer; }
+  button:hover { border-color: var(--accent); }
+  button.primary { background: var(--gold); border-color: var(--gold); color: #1d1606; font-weight: 600; }
+  button.ghost { background: transparent; color: inherit; border-color: rgba(255,255,255,.4); }
+  button.small { padding: 2px 8px; font-size: 12px; }
+  button.danger { color: var(--danger); }
+  button:disabled { opacity: .5; cursor: default; }
+  main { display: grid; grid-template-columns: 260px minmax(280px, 1fr) 380px; gap: 12px; padding: 12px; align-items: start; }
+  @media (max-width: 1100px) { main { grid-template-columns: 1fr 1fr; } #inspectorPanel { grid-column: 1 / -1; } }
+  @media (max-width: 700px) { main { grid-template-columns: 1fr; } }
+  section.panel { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 12px; min-width: 0; }
+  .panel h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .8px; color: var(--muted); margin: 0 0 10px; display: flex; align-items: center; gap: 8px; }
+  .panel h2 .grow { flex: 1; }
+  .drop { border: 2px dashed var(--line); border-radius: var(--radius); padding: 10px; text-align: center; color: var(--muted); margin-bottom: 10px; }
+  .drop.over { border-color: var(--accent); background: var(--sel); }
+  .media-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .media { border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: #fff; cursor: grab; }
+  .thumb { width: 100%; aspect-ratio: 16/10; object-fit: cover; display: block; background: #222; }
+  .media .meta { padding: 4px 6px; font-size: 11px; }
+  .media .name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 600; }
+  .media .actions { display: flex; gap: 4px; flex-wrap: wrap; padding: 0 6px 6px; }
+  .audio-thumb { display: grid; place-items: center; font-size: 26px; color: #fff; background: linear-gradient(135deg, #1b4965, #5fa8d3); }
+  .seq { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+  .clip { display: grid; grid-template-columns: 26px 64px 1fr auto; gap: 10px; align-items: center; padding: 8px; border: 1px solid var(--line); border-radius: 8px; background: #fff; cursor: pointer; }
+  .clip.selected { border-color: var(--accent); background: var(--sel); box-shadow: 0 0 0 1px var(--accent); }
+  .clip.dragging { opacity: .4; }
+  .clip.drop-before { box-shadow: 0 -3px 0 var(--gold); }
+  .clip .num { font-weight: 700; color: var(--muted); text-align: center; cursor: grab; }
+  .clip .thumb { width: 64px; aspect-ratio: 9/16; border-radius: 4px; }
+  .clip .title { font-weight: 600; }
+  .clip .sub { color: var(--muted); font-size: 12px; }
+  .clip.bad { border-color: var(--danger); }
+  .empty { color: var(--muted); padding: 24px; text-align: center; border: 2px dashed var(--line); border-radius: var(--radius); }
+  .problems { background: #fbeae6; color: var(--danger); border-radius: 8px; padding: 8px 12px; margin-bottom: 10px; font-size: 13px; }
+  .problems ul { margin: 4px 0 0; padding-left: 18px; }
+  label.f { display: grid; gap: 3px; font-size: 12px; color: var(--muted); margin-bottom: 8px; }
+  label.f input[type=text], label.f input[type=number], label.f select, label.f textarea { width: 100%; padding: 6px 8px; border: 1px solid var(--line); border-radius: 6px; background: #fff; color: var(--ink); font-size: 14px; }
+  label.check { display: flex; gap: 6px; align-items: center; margin-bottom: 8px; }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+  fieldset { border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px 4px; margin: 0 0 10px; }
+  legend { font-weight: 600; font-size: 12px; padding: 0 4px; }
+  .frame-wrap { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 10px; }
+  .frame { position: relative; width: 162px; aspect-ratio: 9/16; overflow: hidden; background: #0d1b2a; border-radius: 6px; flex: none; touch-action: none; }
+  .frame.manual { cursor: move; outline: 2px solid var(--gold); }
+  .frame > * { position: absolute; max-width: none; pointer-events: none; }
+  .frame .blurbg { filter: blur(8px) brightness(.8) saturate(1.15); }
+  .frame .cap { left: 6%; right: 6%; text-align: center; display: grid; gap: 3px; justify-items: center; }
+  .frame .cap span { background: rgba(13,27,42,.55); color: #fff; padding: 1px 4px; font-weight: 700; font-size: 10px; line-height: 1.25; }
+  .frame .cap span.s { font-size: 7px; }
+  .frame .logo { width: 15%; top: 2.5%; right: 4.5%; }
+  .hint { color: var(--muted); font-size: 12px; margin: 4px 0 8px; }
+  video.src { width: 100%; border-radius: 6px; background: #000; max-height: 220px; }
+  .trim-buttons { display: flex; gap: 6px; flex-wrap: wrap; margin: 6px 0 8px; }
+  .progress { height: 6px; background: rgba(255,255,255,.25); border-radius: 3px; overflow: hidden; width: 160px; }
+  .progress div { height: 100%; width: 0; background: var(--gold); transition: width .3s; }
+  #status { font-size: 13px; max-width: 360px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .result { margin-top: 12px; }
+  .result video { width: 100%; max-width: 270px; aspect-ratio: 9/16; background: #000; border-radius: 8px; display: block; }
+  .tabs { display: flex; gap: 4px; margin-bottom: 10px; }
+  .tabs button[aria-selected=true] { background: var(--accent); color: #fff; border-color: var(--accent); }
+  dialog { border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; max-width: 420px; width: 92vw; }
+  dialog ul { list-style: none; padding: 0; margin: 8px 0; display: grid; gap: 6px; }
+  dialog li button { width: 100%; text-align: left; }
+  .err-pre { white-space: pre-wrap; font: 12px/1.4 ui-monospace, monospace; background: #fbeae6; color: var(--danger); padding: 8px; border-radius: 6px; max-height: 200px; overflow: auto; }
+  input[type=range] { width: 100%; }
+  .muted { color: var(--muted); }
+</style>
+</head>
+<body>
+<header>
+  <h1>Promo Maker</h1>
+  <span class="total" id="total">—</span>
+  <span class="spacer"></span>
+  <button class="ghost" id="btnTemplates">Templates…</button>
+  <button class="ghost" id="btnPreview" title="Half-size, fast render to check the sequence">Preview</button>
+  <button class="primary" id="btnExport" title="Full-quality MP4">Export MP4</button>
+  <div class="progress" aria-hidden="true"><div id="bar"></div></div>
+  <span id="status">Ready</span>
+</header>
+
+<main>
+  <!-- Media library -->
+  <section class="panel" id="mediaPanel">
+    <h2><span class="grow">Media</span><button class="small" id="btnUpload">Import…</button></h2>
+    <input type="file" id="fileInput" multiple accept="image/*,video/*,audio/*" hidden>
+    <div class="drop" id="dropZone">Drop images, videos and music here</div>
+    <div class="media-grid" id="mediaGrid"></div>
+  </section>
+
+  <!-- Sequence -->
+  <section class="panel" id="seqPanel">
+    <h2><span class="grow">Sequence</span><span class="muted" style="text-transform:none;letter-spacing:0">drag to reorder</span></h2>
+    <div id="problems"></div>
+    <ol class="seq" id="seq"></ol>
+    <div class="result" id="result"></div>
+  </section>
+
+  <!-- Inspector -->
+  <section class="panel" id="inspectorPanel">
+    <div class="tabs" role="tablist">
+      <button role="tab" id="tabClip" aria-selected="true">Clip</button>
+      <button role="tab" id="tabPromo" aria-selected="false">Promo settings</button>
+    </div>
+    <div id="inspector"></div>
+  </section>
+</main>
+
+<dialog id="tplDialog">
+  <h3 style="margin-top:0">Templates</h3>
+  <p class="hint">A template is a whole promo: order, timings, framing, captions, music and logo. Load one, then swap each clip's media for this event's files.</p>
+  <ul id="tplList"></ul>
+  <form method="dialog" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+    <input type="text" id="tplName" placeholder="Name for the current promo" style="flex:1;padding:6px 8px;border:1px solid var(--line);border-radius:6px">
+    <button id="btnSaveTpl" value="save">Save current as template</button>
+    <button value="cancel">Close</button>
+  </form>
+</dialog>
+
+<script>
+'use strict';
+/* ------------------------------------------------------------------ state */
+let promo = null;            // the promo JSON, exactly as saved to disk
+let media = [];              // [{name, kind, width, height, duration, hasAudio}]
+let selected = 0;            // index of the selected clip
+let tab = 'clip';
+let validation = { problems: [], durations: [], total: 0 };
+
+const $ = (s, el = document) => el.querySelector(s);
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const mediaURL = (name) => '/media/' + encodeURIComponent(name);
+const info = (name) => media.find((m) => m.name === name);
+const fmt = (s) => (Number(s) || 0).toFixed(1).replace(/\.0$/, '') + 's';
+const api = async (url, opts = {}) => {
+  const r = await fetch(url, opts);
+  const body = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(body.error || r.statusText);
+  return body;
+};
+const FRAMING_LABEL = {
+  'fill': 'Crop to fill', 'fit-blur': 'Fit, blurred background', 'fit': 'Fit, plain background', 'manual': 'Manual position',
+};
+
+/* ------------------------------------------------------- load and save */
+async function load() {
+  [promo, media] = await Promise.all([api('/api/project'), api('/api/media')]);
+  promo.clips ||= [];
+  renderAll();
+  validate();
+}
+let saveTimer = null;
+function changed({ redraw = true } = {}) {
+  if (redraw) renderAll();
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(async () => {
+    await api('/api/project', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(promo) });
+    validate();
+  }, 350);
+}
+async function validate() {
+  validation = await api('/api/validate');
+  $('#total').textContent = `${promo.clips.length} clip${promo.clips.length === 1 ? '' : 's'} · ${fmt(validation.total)} · ${promo.output?.width || 1080}×${promo.output?.height || 1920}`;
+  const p = validation.problems;
+  $('#problems').innerHTML = p.length
+    ? `<div class="problems"><strong>To fix before rendering:</strong><ul>${p.map((x) => `<li>${esc(x)}</li>`).join('')}</ul></div>` : '';
+  document.querySelectorAll('.clip').forEach((el, i) => el.classList.toggle('bad', p.some((x) => x.startsWith(`Clip ${i + 1}:`) || x.startsWith(`Clip ${i + 1} (`))));
+}
+
+function renderAll() { renderMedia(); renderSequence(); renderInspector(); }
+
+/* -------------------------------------------------------------- media */
+function thumbHTML(name, cls = 'thumb', t = 1) {
+  const m = info(name);
+  if (!m) return `<div class="${cls} audio-thumb" title="missing">?</div>`;
+  if (m.kind === 'image') return `<img class="${cls}" src="${mediaURL(name)}" alt="" loading="lazy">`;
+  if (m.kind === 'video') return `<video class="${cls}" src="${mediaURL(name)}#t=${t}" muted preload="metadata"></video>`;
+  return `<div class="${cls} audio-thumb">♪</div>`;
+}
+function renderMedia() {
+  const grid = $('#mediaGrid');
+  if (!media.length) { grid.innerHTML = '<p class="hint" style="grid-column:1/-1">No media yet. Import the poster, videos, photos and music for this event.</p>'; return; }
+  grid.innerHTML = media.map((m, i) => `
+    <div class="media" draggable="${m.kind !== 'audio'}" data-i="${i}">
+      ${thumbHTML(m.name)}
+      <div class="meta"><div class="name" title="${esc(m.name)}">${esc(m.name)}</div>
+        <div class="muted">${m.kind}${m.width ? ` · ${m.width}×${m.height}` : ''}${m.kind !== 'image' && m.duration ? ` · ${fmt(m.duration)}` : ''}</div></div>
+      <div class="actions">
+        ${m.kind !== 'audio' ? `<button class="small" data-act="add">+ Add</button>` : `<button class="small" data-act="music">Use as music</button>`}
+        ${m.kind === 'image' ? `<button class="small" data-act="logo">Logo</button>` : ''}
+        <button class="small danger" data-act="del" title="Delete file">✕</button>
+      </div>
+    </div>`).join('');
+}
+$('#mediaGrid').addEventListener('click', async (e) => {
+  const b = e.target.closest('button'); if (!b) return;
+  const m = media[e.target.closest('.media').dataset.i];
+  if (b.dataset.act === 'add') addClip(m.name);
+  if (b.dataset.act === 'music') { promo.music = { volume: 0.35, duck: true, duckAmount: 0.25, fadeIn: 1, fadeOut: 2, ...(promo.music || {}), file: m.name }; tab = 'promo'; changed(); }
+  if (b.dataset.act === 'logo') { promo.logo = { position: 'top-right', width: 0.15, margin: 0.045, opacity: 0.92, ...(promo.logo || {}), file: m.name }; tab = 'promo'; changed(); }
+  if (b.dataset.act === 'del') {
+    const used = promo.clips.some((c) => c.file === m.name) || promo.music?.file === m.name || promo.logo?.file === m.name;
+    if (!confirm(`Delete ${m.name} from the workspace?${used ? '\n\nIt is used in this promo.' : ''}`)) return;
+    await api('/api/media/' + encodeURIComponent(m.name), { method: 'DELETE' });
+    media = await api('/api/media'); changed();
+  }
+});
+$('#mediaGrid').addEventListener('dragstart', (e) => {
+  const el = e.target.closest('.media'); if (!el) return;
+  e.dataTransfer.setData('text/x-media', media[el.dataset.i].name);
+});
+
+function addClip(name, at = promo.clips.length) {
+  const m = info(name);
+  const base = m.name.replace(/\.[^.]+$/, '').replace(/[-_]+/g, ' ');
+  const clip = m.kind === 'image'
+    ? { label: base, file: name, duration: 4, framing: m.width > m.height ? 'fit-blur' : (m.height / m.width > 1.6 ? 'fill' : 'fit-blur'), zoom: 'in', zoomAmount: 0.06 }
+    : { label: base, file: name, start: 0, end: Math.min(m.duration || 6, 6), framing: m.width > m.height ? 'fit-blur' : 'fill', keepAudio: false };
+  promo.clips.splice(at, 0, clip);
+  selected = at; tab = 'clip';
+  changed();
+}
+
+// Upload: file picker or drag-and-drop from the desktop.
+$('#btnUpload').onclick = () => $('#fileInput').click();
+$('#fileInput').onchange = (e) => upload([...e.target.files]);
+const dz = $('#dropZone');
+for (const el of [dz, document.body]) {
+  el.addEventListener('dragover', (e) => { if (e.dataTransfer.types.includes('Files')) { e.preventDefault(); dz.classList.add('over'); } });
+  el.addEventListener('dragleave', () => dz.classList.remove('over'));
+  el.addEventListener('drop', (e) => { if (e.dataTransfer.files.length) { e.preventDefault(); dz.classList.remove('over'); upload([...e.dataTransfer.files]); } });
+}
+async function upload(files) {
+  for (const [i, f] of files.entries()) {
+    status(`Importing ${f.name} (${i + 1}/${files.length})…`);
+    try { await api('/api/media/' + encodeURIComponent(f.name), { method: 'POST', body: f }); }
+    catch (e) { alert(`${f.name}: ${e.message}`); }
+  }
+  media = await api('/api/media');
+  status('Ready'); renderAll(); validate();
+  $('#fileInput').value = '';
+}
+
+/* ----------------------------------------------------------- sequence */
+function renderSequence() {
+  const seq = $('#seq');
+  if (!promo.clips.length) { seq.innerHTML = '<li class="empty">Add media with “+ Add”, or drag it here.</li>'; return; }
+  seq.innerHTML = promo.clips.map((c, i) => {
+    const m = info(c.file);
+    const dur = m?.kind === 'video' ? `${fmt(c.start || 0)} → ${fmt(c.end)} (${fmt((c.end || 0) - (c.start || 0))})` : fmt(c.duration || 4);
+    const extras = [FRAMING_LABEL[c.framing] || c.framing, c.zoom && c.zoom !== 'none' ? `zoom ${c.zoom}` : '',
+      c.caption?.title ? `“${c.caption.title}”` : '', c.keepAudio ? 'keeps sound' : ''].filter(Boolean).join(' · ');
+    return `<li class="clip${i === selected && tab === 'clip' ? ' selected' : ''}" draggable="true" data-i="${i}">
+      <span class="num">${i + 1}</span>
+      ${thumbHTML(c.file, 'thumb', c.start || 0.5)}
+      <div><div class="title">${esc(c.label || c.file)}</div>
+        <div class="sub">${m ? m.kind : 'missing file'} · ${dur}</div><div class="sub">${esc(extras)}</div></div>
+      <div style="display:grid;gap:4px">
+        <button class="small" data-act="up" ${i === 0 ? 'disabled' : ''} title="Move up">↑</button>
+        <button class="small" data-act="down" ${i === promo.clips.length - 1 ? 'disabled' : ''} title="Move down">↓</button>
+        <button class="small danger" data-act="remove" title="Remove from sequence">✕</button>
+      </div></li>`;
+  }).join('');
+}
+function move(from, to) {
+  const [c] = promo.clips.splice(from, 1);
+  promo.clips.splice(to, 0, c);
+  selected = to; changed();
+}
+$('#seq').addEventListener('click', (e) => {
+  const li = e.target.closest('.clip'); if (!li) return;
+  const i = Number(li.dataset.i);
+  const act = e.target.closest('button')?.dataset.act;
+  if (act === 'up') return move(i, i - 1);
+  if (act === 'down') return move(i, i + 1);
+  if (act === 'remove') { promo.clips.splice(i, 1); selected = Math.min(selected, promo.clips.length - 1); return changed(); }
+  selected = i; tab = 'clip'; renderAll();
+});
+let dragFrom = null;
+$('#seq').addEventListener('dragstart', (e) => {
+  const li = e.target.closest('.clip'); if (!li) return;
+  dragFrom = Number(li.dataset.i); li.classList.add('dragging');
+  e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/x-clip', String(dragFrom));
+});
+$('#seq').addEventListener('dragend', () => { dragFrom = null; document.querySelectorAll('.clip').forEach((x) => x.classList.remove('dragging', 'drop-before')); });
+function dropIndex(e) {
+  const items = [...document.querySelectorAll('.clip')];
+  const idx = items.findIndex((li) => { const r = li.getBoundingClientRect(); return e.clientY < r.top + r.height / 2; });
+  return idx < 0 ? items.length : idx;
+}
+$('#seqPanel').addEventListener('dragover', (e) => {
+  if (!e.dataTransfer.types.includes('text/x-clip') && !e.dataTransfer.types.includes('text/x-media')) return;
+  e.preventDefault();
+  const at = dropIndex(e);
+  document.querySelectorAll('.clip').forEach((li, k) => li.classList.toggle('drop-before', k === at));
+});
+$('#seqPanel').addEventListener('drop', (e) => {
+  const at = dropIndex(e);
+  document.querySelectorAll('.clip').forEach((x) => x.classList.remove('drop-before'));
+  const name = e.dataTransfer.getData('text/x-media');
+  if (name) { e.preventDefault(); return addClip(name, at); }
+  if (dragFrom !== null) { e.preventDefault(); move(dragFrom, at > dragFrom ? at - 1 : at); }
+});
+
+/* ---------------------------------------------------------- inspector */
+$('#tabClip').onclick = () => { tab = 'clip'; renderAll(); };
+$('#tabPromo').onclick = () => { tab = 'promo'; renderAll(); };
+
+// Small form builders. `get`/`set` read and write the promo object.
+const field = (label, input, hint = '') => `<label class="f">${label}${input}${hint ? `<span class="hint">${hint}</span>` : ''}</label>`;
+const text = (key, val, ph = '') => `<input type="text" data-k="${key}" value="${esc(val ?? '')}" placeholder="${esc(ph)}">`;
+const number = (key, val, step = 0.1, min = 0, max = '') => `<input type="number" data-k="${key}" value="${val ?? ''}" step="${step}" min="${min}" max="${max}">`;
+const select = (key, val, opts) => `<select data-k="${key}">${Object.entries(opts).map(([v, l]) => `<option value="${v}" ${String(val) === v ? 'selected' : ''}>${esc(l)}</option>`).join('')}</select>`;
+const range = (key, val, min, max, step) => `<input type="range" data-k="${key}" value="${val}" min="${min}" max="${max}" step="${step}">`;
+const check = (key, val, label) => `<label class="check"><input type="checkbox" data-k="${key}" ${val ? 'checked' : ''}> ${label}</label>`;
+
+function getPath(obj, key) { return key.split('.').reduce((o, k) => (o == null ? undefined : o[k]), obj); }
+function setPath(obj, key, v) {
+  const ks = key.split('.'); let o = obj;
+  for (const k of ks.slice(0, -1)) { o[k] ??= {}; o = o[k]; }
+  if (v === '' || v === undefined) delete o[ks.at(-1)]; else o[ks.at(-1)] = v;
+}
+
+function renderInspector() {
+  $('#tabClip').setAttribute('aria-selected', tab === 'clip');
+  $('#tabPromo').setAttribute('aria-selected', tab === 'promo');
+  const el = $('#inspector');
+  if (tab === 'promo') { el.innerHTML = promoSettingsHTML(); bindInputs(el, promo); return; }
+  const c = promo.clips[selected];
+  if (!c) { el.innerHTML = '<p class="hint">Select a clip in the sequence to edit it.</p>'; return; }
+  const m = info(c.file);
+  const kind = m?.kind;
+  const sameKind = media.filter((x) => x.kind === 'image' || x.kind === 'video');
+  el.innerHTML = `
+    ${field('Label (for you; not shown in the video)', text('label', c.label))}
+    ${field('Media', select('file', c.file, Object.fromEntries([[c.file, c.file + (m ? '' : ' (missing)')], ...sameKind.map((x) => [x.name, `${x.name} — ${x.kind}`])])),
+      'Swap the file to reuse this template for a new event.')}
+    <div class="frame-wrap">
+      <div class="frame${c.framing === 'manual' ? ' manual' : ''}" id="frame"></div>
+      <div style="flex:1;min-width:0">
+        ${field('Framing', select('framing', c.framing || 'fill', FRAMING_LABEL))}
+        ${c.framing === 'manual' ? `
+          ${field(`Horizontal position <span data-show="focusX">${Math.round((c.focusX ?? .5) * 100)}%</span>`, range('focusX', c.focusX ?? 0.5, 0, 1, 0.01))}
+          ${field(`Vertical position <span data-show="focusY">${Math.round((c.focusY ?? .5) * 100)}%</span>`, range('focusY', c.focusY ?? 0.5, 0, 1, 0.01))}
+          ${field(`Extra zoom <span data-show="scale">${(c.scale ?? 1).toFixed(2)}×</span>`, range('scale', c.scale ?? 1, 1, 3, 0.01))}
+          <p class="hint">Or drag the picture in the frame.</p>` : ''}
+        ${c.framing === 'fit' || c.framing === 'fit-blur' ? field(`Margin <span data-show="inset">${Math.round((c.inset ?? 0) * 100)}%</span>`, range('inset', c.inset ?? 0, 0, 0.2, 0.005), 'Fit keeps the whole picture, so poster text stays readable.') : ''}
+      </div>
+    </div>
+    ${kind === 'video' ? `
+      <fieldset><legend>Segment</legend>
+        <video class="src" id="srcVideo" src="${mediaURL(c.file)}" controls preload="metadata"></video>
+        <div class="trim-buttons">
+          <button class="small" id="setStart">Start here</button>
+          <button class="small" id="setEnd">End here</button>
+          <button class="small" id="playSel">▶ Play segment</button>
+        </div>
+        <div class="row">${field('Start (s)', number('start', c.start ?? 0, 0.1, 0, m.duration))}${field('End (s)', number('end', c.end, 0.1, 0, m.duration))}</div>
+        <p class="hint">Length ${fmt((c.end || 0) - (c.start || 0))} of ${fmt(m.duration)}.</p>
+        ${m.hasAudio ? `${check('keepAudio', c.keepAudio, 'Keep this clip’s sound (speech)')}
+          ${c.keepAudio ? field(`Clip volume <span data-show="audioVolume">${Math.round((c.audioVolume ?? 1) * 100)}%</span>`, range('audioVolume', c.audioVolume ?? 1, 0, 2, 0.05)) : ''}`
+          : '<p class="hint">This video has no sound.</p>'}
+      </fieldset>` : kind === 'image' ? `
+      ${field('Show for (seconds)', number('duration', c.duration ?? 4, 0.5, 1, 30))}` : ''}
+    <fieldset><legend>Motion</legend>
+      <div class="row">${field('Gentle zoom', select('zoom', c.zoom || 'none', { none: 'None', in: 'Zoom in', out: 'Zoom out' }))}
+      ${field(`Amount <span data-show="zoomAmount">${Math.round((c.zoomAmount ?? 0.08) * 100)}%</span>`, range('zoomAmount', c.zoomAmount ?? 0.08, 0.02, 0.2, 0.01))}</div>
+      ${selected > 0 ? field('Transition into this clip', select('transition', c.transition || '', { '': `Promo default (${promo.transition?.type || 'fade'})`, fade: 'Cross-fade', fadeblack: 'Through black', fadewhite: 'Through white', dissolve: 'Dissolve', slideleft: 'Slide left', slideup: 'Slide up', smoothleft: 'Smooth left', circleopen: 'Circle open', wipeleft: 'Wipe left' })) : ''}
+    </fieldset>
+    <fieldset><legend>Caption</legend>
+      ${field('Title', text('caption.title', c.caption?.title, 'e.g. the speaker’s name'))}
+      ${field('Subtitle', text('caption.subtitle', c.caption?.subtitle, 'e.g. Rajyoga teacher, Brahma Kumaris'))}
+      ${field('Position', select('caption.position', c.caption?.position || 'bottom', { bottom: 'Bottom', center: 'Centre', top: 'Top' }))}
+    </fieldset>`;
+  bindInputs(el, c);
+  drawFrame(c);
+  if (kind === 'video') bindTrim(c);
+}
+
+function promoSettingsHTML() {
+  const o = promo.output || {}, t = promo.transition || {}, f = promo.font || {}, L = promo.logo || {}, M = promo.music || {};
+  const audio = media.filter((m) => m.kind === 'audio'), images = media.filter((m) => m.kind === 'image');
+  return `
+    ${field('Template name', text('name', promo.name))}
+    <fieldset><legend>Output</legend>
+      <div class="row">${field('Size', select('output.size', `${o.width || 1080}x${o.height || 1920}`, { '1080x1920': '1080×1920 9:16', '720x1280': '720×1280 9:16', '1080x1350': '1080×1350 4:5', '1080x1080': '1080×1080 1:1' }))}
+      ${field('Frame rate', select('output.fps', String(o.fps || 30), { 25: '25 fps', 30: '30 fps', 60: '60 fps' }))}</div>
+      ${field('Background colour (behind “fit”)', `<input type="color" data-k="background" value="${esc(promo.background || '#0d1b2a')}">`)}
+    </fieldset>
+    <fieldset><legend>Transitions</legend>
+      <div class="row">${field('Between clips', select('transition.type', t.type || 'fade', { fade: 'Cross-fade', fadeblack: 'Through black', dissolve: 'Dissolve', slideleft: 'Slide left', smoothleft: 'Smooth left', none: 'Cut (none)' }))}
+      ${field('Length (s)', number('transition.duration', t.duration ?? 0.5, 0.1, 0, 2))}</div>
+      <div class="row">${field('Fade in from black (s)', number('fadeIn', promo.fadeIn ?? 0.4, 0.1, 0, 3))}${field('Fade out at end (s)', number('fadeOut', promo.fadeOut ?? 0.8, 0.1, 0, 3))}</div>
+    </fieldset>
+    <fieldset><legend>Music</legend>
+      ${field('Track', select('music.file', M.file || '', { '': 'No music', ...Object.fromEntries(audio.map((a) => [a.name, a.name])) }))}
+      ${M.file ? `
+        ${field(`Volume <span data-show="music.volume">${Math.round((M.volume ?? 0.35) * 100)}%</span>`, range('music.volume', M.volume ?? 0.35, 0, 1, 0.01))}
+        ${check('music.duck', M.duck ?? true, 'Lower the music while a clip’s speech is playing')}
+        ${M.duck ?? true ? field(`Music under speech <span data-show="music.duckAmount">${Math.round((M.duckAmount ?? 0.25) * 100)}%</span>`, range('music.duckAmount', M.duckAmount ?? 0.25, 0.05, 1, 0.05)) : ''}
+        <div class="row3">${field('Start at (s)', number('music.start', M.start ?? 0, 1, 0))}${field('Fade in (s)', number('music.fadeIn', M.fadeIn ?? 1, 0.5, 0, 10))}${field('Fade out (s)', number('music.fadeOut', M.fadeOut ?? 2, 0.5, 0, 10))}</div>
+        <audio src="${mediaURL(M.file)}" controls style="width:100%"></audio>` : '<p class="hint">Import an audio file, then choose it here.</p>'}
+    </fieldset>
+    <fieldset><legend>Logo</legend>
+      ${field('Image', select('logo.file', L.file || '', { '': 'No logo', ...Object.fromEntries(images.map((a) => [a.name, a.name])) }), 'A PNG with a transparent background looks best.')}
+      ${L.file ? `<div class="row">${field('Corner', select('logo.position', L.position || 'top-right', { 'top-right': 'Top right', 'top-left': 'Top left', 'top-center': 'Top centre', 'bottom-right': 'Bottom right', 'bottom-left': 'Bottom left', 'bottom-center': 'Bottom centre' }))}
+        ${field(`Size <span data-show="logo.width">${Math.round((L.width ?? 0.15) * 100)}%</span>`, range('logo.width', L.width ?? 0.15, 0.05, 0.4, 0.01))}</div>
+        ${field(`Opacity <span data-show="logo.opacity">${Math.round((L.opacity ?? 0.92) * 100)}%</span>`, range('logo.opacity', L.opacity ?? 0.92, 0.2, 1, 0.01))}` : ''}
+    </fieldset>
+    <fieldset><legend>Captions</legend>
+      <div class="row">${field('Text colour', `<input type="color" data-k="font.color" value="${esc(f.color || '#ffffff')}">`)}
+      ${field('Box colour', `<input type="color" data-k="font.boxColor" value="${esc(f.boxColor || '#000000')}">`)}</div>
+      ${field(`Box opacity <span data-show="font.boxOpacity">${Math.round((f.boxOpacity ?? 0.45) * 100)}%</span>`, range('font.boxOpacity', f.boxOpacity ?? 0.45, 0, 1, 0.05))}
+      ${field('Font file (optional)', text('font.file', f.file, 'e.g. fonts/NotoSansDevanagari-Bold.ttf'), 'Relative to the workspace folder. Hindi captions pick a Devanagari font automatically if one is installed.')}
+    </fieldset>`;
+}
+
+/** Wire every [data-k] input in `root` to `obj`. */
+function bindInputs(root, obj) {
+  root.querySelectorAll('[data-k]').forEach((inp) => {
+    const k = inp.dataset.k;
+    const live = inp.type === 'range';
+    inp.addEventListener(live ? 'input' : 'change', () => {
+      let v = inp.type === 'checkbox' ? inp.checked : inp.value;
+      if (inp.type === 'number' || inp.type === 'range') v = v === '' ? '' : Number(v);
+      if (k === 'output.size') { const [w, h] = v.split('x').map(Number); setPath(obj, 'output.width', w); setPath(obj, 'output.height', h); }
+      else if (k === 'output.fps') setPath(obj, k, Number(v));
+      else if (k === 'music.file' && !v) { delete obj.music; }
+      else if (k === 'logo.file' && !v) { delete obj.logo; }
+      else setPath(obj, k, v);
+      if (k.startsWith('caption.') && obj.caption && !obj.caption.title && !obj.caption.subtitle) delete obj.caption;
+      if (k === 'file') { // swapped media: reset fields that belong to the old file
+        const m = info(v);
+        if (m?.kind === 'video') { delete obj.duration; obj.start = 0; obj.end = Math.min(m.duration, 6); }
+        else { delete obj.start; delete obj.end; delete obj.keepAudio; obj.duration ??= 4; }
+      }
+      if (live) {
+        const show = root.querySelector(`[data-show="${k}"]`);
+        if (show) show.textContent = k === 'scale' ? `${v.toFixed(2)}×` : `${Math.round(v * 100)}%`;
+        if (tab === 'clip') drawFrame(obj);
+        return changed({ redraw: false });
+      }
+      // Structural changes re-draw the panel; plain edits only refresh the list.
+      const structural = ['framing', 'file', 'keepAudio', 'music.file', 'music.duck', 'logo.file'].includes(k);
+      if (structural) changed(); else { renderSequence(); if (tab === 'clip') drawFrame(obj); changed({ redraw: false }); }
+    });
+  });
+}
+
+/* --------------------------------------------- framing preview (9:16) */
+/**
+ * Draws the clip as the renderer will frame it: the same geometry as
+ * framingFilter() in render.js, computed in CSS pixels.
+ */
+function drawFrame(c) {
+  const box = $('#frame'); if (!box) return;
+  const m = info(c.file);
+  const W = box.clientWidth, H = box.clientHeight;
+  const ow = promo.output?.width || 1080, oh = promo.output?.height || 1920;
+  box.style.aspectRatio = `${ow}/${oh}`;
+  if (!m || !m.width) { box.innerHTML = '<div style="color:#fff;padding:8px;font-size:12px">No preview</div>'; return; }
+  const iw = m.width, ih = m.height;
+  const src = m.kind === 'video' ? `${mediaURL(c.file)}#t=${c.start || 0}` : mediaURL(c.file);
+  const tag = (cls, w, h, x, y) => m.kind === 'video'
+    ? `<video class="${cls}" src="${src}" muted preload="auto" style="width:${w}px;height:${h}px;left:${x}px;top:${y}px"></video>`
+    : `<img class="${cls}" src="${src}" alt="" style="width:${w}px;height:${h}px;left:${x}px;top:${y}px">`;
+  let html = '';
+  const framing = c.framing || 'fill';
+  if (framing === 'fill' || framing === 'manual') {
+    const s = framing === 'manual' ? (c.scale ?? 1) : 1;
+    const fx = framing === 'manual' ? (c.focusX ?? 0.5) : 0.5, fy = framing === 'manual' ? (c.focusY ?? 0.5) : 0.5;
+    const k = Math.max(W / iw, H / ih) * s;
+    html = tag('', iw * k, ih * k, -(iw * k - W) * fx, -(ih * k - H) * fy);
+  } else {
+    const zoomRoom = c.zoom && c.zoom !== 'none' ? (c.zoomAmount ?? 0.08) / 2 + 0.01 : 0;
+    const inset = Math.max(c.inset || 0, zoomRoom);
+    const k = Math.min(W * (1 - 2 * inset) / iw, H * (1 - 2 * inset) / ih);
+    if (framing === 'fit-blur') { const kb = Math.max(W / iw, H / ih); html += tag('blurbg', iw * kb, ih * kb, (W - iw * kb) / 2, (H - ih * kb) / 2); }
+    else box.style.background = promo.background || '#0d1b2a';
+    html += tag('', iw * k, ih * k, (W - iw * k) / 2, (H - ih * k) / 2);
+  }
+  if (c.caption?.title || c.caption?.subtitle) {
+    const pos = c.caption.position || 'bottom';
+    const style = pos === 'top' ? 'top:14%' : pos === 'center' ? 'top:50%;transform:translateY(-50%)' : 'bottom:20%';
+    html += `<div class="cap" style="${style}">${c.caption.title ? `<span>${esc(c.caption.title)}</span>` : ''}${c.caption.subtitle ? `<span class="s">${esc(c.caption.subtitle)}</span>` : ''}</div>`;
+  }
+  if (promo.logo?.file) html += `<img class="logo" src="${mediaURL(promo.logo.file)}" alt="" style="width:${(promo.logo.width ?? 0.15) * 100}%">`;
+  box.innerHTML = html;
+  box.querySelectorAll('video').forEach((v) => { v.addEventListener('loadedmetadata', () => { v.currentTime = c.start || 0; }); });
+
+  // Manual framing: drag the picture to choose what stays in frame.
+  box.onpointerdown = framing !== 'manual' ? null : (e) => {
+    box.setPointerCapture(e.pointerId);
+    const k = Math.max(W / iw, H / ih) * (c.scale ?? 1);
+    const spanX = iw * k - W, spanY = ih * k - H;
+    const start = { x: e.clientX, y: e.clientY, fx: c.focusX ?? 0.5, fy: c.focusY ?? 0.5 };
+    box.onpointermove = (ev) => {
+      if (spanX > 1) c.focusX = Math.round(Math.min(1, Math.max(0, start.fx - (ev.clientX - start.x) / spanX)) * 100) / 100;
+      if (spanY > 1) c.focusY = Math.round(Math.min(1, Math.max(0, start.fy - (ev.clientY - start.y) / spanY)) * 100) / 100;
+      drawFrame(c);
+      for (const key of ['focusX', 'focusY']) {
+        const r = document.querySelector(`[data-k="${key}"]`); if (r) r.value = c[key] ?? 0.5;
+        const s = document.querySelector(`[data-show="${key}"]`); if (s) s.textContent = `${Math.round((c[key] ?? 0.5) * 100)}%`;
+      }
+    };
+    box.onpointerup = () => { box.onpointermove = null; changed({ redraw: false }); };
+  };
+}
+
+/* ------------------------------------------------------ video trimming */
+function bindTrim(c) {
+  const v = $('#srcVideo');
+  let stopAt = null;
+  v.addEventListener('loadedmetadata', () => { v.currentTime = c.start || 0; });
+  v.addEventListener('timeupdate', () => { if (stopAt !== null && v.currentTime >= stopAt) { v.pause(); stopAt = null; } });
+  const round = (t) => Math.round(t * 10) / 10;
+  $('#setStart').onclick = () => {
+    c.start = round(v.currentTime);
+    if (c.end <= c.start) c.end = round(Math.min(v.duration, c.start + 6));
+    changed();
+  };
+  $('#setEnd').onclick = () => {
+    const t = round(v.currentTime);
+    if (t <= (c.start || 0)) return alert('The end must be after the start.');
+    c.end = t; changed();
+  };
+  $('#playSel').onclick = () => { v.currentTime = c.start || 0; stopAt = c.end; v.play(); };
+}
+
+/* -------------------------------------------------------------- render */
+function status(s) { $('#status').textContent = s; $('#status').title = s; }
+async function startRender(preview) {
+  clearTimeout(saveTimer);
+  await api('/api/project', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(promo) });
+  await validate();
+  if (validation.problems.length) { status('Fix the problems listed above first'); return; }
+  try { await api('/api/render' + (preview ? '?preview=1' : ''), { method: 'POST' }); }
+  catch (e) { status(e.message); return; }
+  $('#btnPreview').disabled = $('#btnExport').disabled = true;
+  poll();
+}
+async function poll() {
+  const j = await api('/api/render');
+  $('#bar').style.width = `${Math.round((j.progress || 0) * 100)}%`;
+  if (j.state === 'running') { status(`${Math.round(j.progress * 100)}% · ${j.stage}`); return setTimeout(poll, 500); }
+  $('#btnPreview').disabled = $('#btnExport').disabled = false;
+  if (j.state === 'done') {
+    status(`${j.preview ? 'Preview' : 'Export'} ready · ${j.size} · ${j.duration.toFixed(1)}s · took ${j.seconds.toFixed(0)}s`);
+    const url = `${j.output}?v=${Date.now()}`;
+    $('#result').innerHTML = `<h2 style="margin-top:8px">${j.preview ? 'Preview (half size)' : 'Final video'}</h2>
+      <video src="${url}#t=1.5" controls playsinline preload="metadata"></video>
+      <p><a href="${url}" download="${j.output.split('/').pop()}">Download ${esc(j.output.split('/').pop())}</a>
+      ${j.preview ? '' : `<br><span class="hint">Saved in the workspace’s out/ folder.</span>`}</p>`;
+  } else if (j.state === 'error') {
+    status('Render failed');
+    $('#result').innerHTML = `<div class="err-pre">${esc(j.error)}</div>`;
+  }
+}
+
+/* ----------------------------------------------------------- templates */
+$('#btnTemplates').onclick = async () => {
+  const list = await api('/api/templates');
+  $('#tplName').value = promo.name || '';
+  $('#tplList').innerHTML = list.map((t) => `<li><button data-id="${esc(t.id)}">${esc(t.title)} <span class="muted">— ${t.source}</span></button></li>`).join('');
+  $('#tplDialog').showModal();
+};
+$('#tplList').onclick = async (e) => {
+  const b = e.target.closest('button[data-id]'); if (!b) return;
+  if (promo.clips.length && !confirm('Replace the current promo with this template? (Save it as a template first if you want to keep it.)')) return;
+  promo = await api('/api/templates/' + b.dataset.id);
+  selected = 0; tab = 'clip';
+  $('#tplDialog').close(); changed();
+};
+$('#btnSaveTpl').onclick = async (e) => {
+  e.preventDefault();
+  const name = $('#tplName').value.trim() || promo.name || 'My promo';
+  promo.name = name;
+  await api('/api/templates', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(promo) });
+  $('#tplDialog').close(); status(`Saved template “${name}”`); changed();
+};
+
+$('#btnPreview').onclick = () => startRender(true);
+$('#btnExport').onclick = () => startRender(false);
+load().then(poll).catch((e) => status(e.message));
+</script>
+</body>
+</html>

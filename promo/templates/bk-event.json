@@ -1,0 +1,57 @@
+{
+  "name": "Brahma Kumaris event promo",
+  "mediaDir": "media",
+  "output": { "width": 1080, "height": 1920, "fps": 30, "file": "out/promo.mp4" },
+  "background": "#0d1b2a",
+  "transition": { "type": "fade", "duration": 0.5 },
+  "fadeIn": 0.4,
+  "fadeOut": 0.8,
+  "font": { "color": "#ffffff", "boxColor": "#0d1b2a", "boxOpacity": 0.55 },
+  "logo": { "file": "logo.png", "position": "top-right", "width": 0.15, "margin": 0.045, "opacity": 0.92 },
+  "music": { "file": "music.m4a", "volume": 0.35, "duck": true, "duckAmount": 0.25, "fadeIn": 1, "fadeOut": 2 },
+  "clips": [
+    {
+      "label": "Event poster",
+      "file": "poster.png",
+      "duration": 4,
+      "framing": "fit-blur",
+      "zoom": "in",
+      "zoomAmount": 0.06
+    },
+    {
+      "label": "Venue video",
+      "file": "venue.mp4",
+      "start": 3,
+      "end": 9,
+      "framing": "fill"
+    },
+    {
+      "label": "Speaker photograph",
+      "file": "speaker.jpg",
+      "duration": 4,
+      "framing": "fill",
+      "zoom": "in",
+      "zoomAmount": 0.05,
+      "caption": { "title": "BK Speaker Name", "subtitle": "Rajyoga teacher, Brahma Kumaris", "position": "bottom" }
+    },
+    {
+      "label": "Event highlights",
+      "file": "highlights.mp4",
+      "start": 10,
+      "end": 18,
+      "framing": "manual",
+      "focusX": 0.78,
+      "focusY": 0.5,
+      "scale": 1,
+      "keepAudio": true,
+      "audioVolume": 1
+    },
+    {
+      "label": "Registration",
+      "file": "registration.png",
+      "duration": 5,
+      "framing": "fit-blur",
+      "caption": { "title": "Om Shanti — see you there", "subtitle": "Sukh Shanti Bhawan, Sector 115, Noida", "position": "top" }
+    }
+  ]
+}

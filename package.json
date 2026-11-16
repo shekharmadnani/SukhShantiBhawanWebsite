@@ -9,7 +9,12 @@
     "check": "node build.js && node tools/check.js",
     "measure": "node build.js && node tools/measure.js",
     "test": "node build.js && node tools/check.js && node tools/measure.js",
-    "serve": "node build.js && node tools/serve.js"
+    "serve": "node build.js && node tools/serve.js",
+    "promo": "node promo/server.js",
+    "promo:render": "node promo/render.js promo/workspace/promo.json",
+    "promo:samples": "node promo/make-samples.js"
   },
-  "engines": { "node": ">=18" }
+  "engines": {
+    "node": ">=18"
+  }
 }
