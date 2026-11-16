@@ -87,6 +87,13 @@
   input[type=range] { width: 100%; }
   .muted { color: var(--muted); }
   .use-as { width: 100%; padding: 5px 6px; border: 2px solid var(--gold); border-radius: 6px; background: #fff8e6; font-weight: 600; font-size: 13px; }
+  .soundtrack { margin-top: 10px; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--line); background: #fff; display: grid; grid-template-columns: 64px 1fr auto; gap: 10px; align-items: center; }
+  .soundtrack.empty-music { border: 2px dashed var(--gold); background: #fffaf0; cursor: pointer; grid-template-columns: 64px 1fr; }
+  .soundtrack.over { background: var(--sel); border-color: var(--accent); }
+  .soundtrack .note { width: 64px; height: 64px; border-radius: 6px; display: grid; place-items: center; font-size: 28px; color: #fff; background: linear-gradient(135deg, #1b4965, #5fa8d3); }
+  .soundtrack audio { width: 100%; height: 32px; margin-top: 4px; }
+  .toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: #1d2733; color: #fff; padding: 10px 18px; border-radius: 8px; font-size: 15px; box-shadow: 0 6px 24px rgba(0,0,0,.25); z-index: 10; opacity: 0; transition: opacity .2s; pointer-events: none; }
+  .toast.show { opacity: 1; }
   .badge { display: inline-block; background: var(--accent); color: #fff; border-radius: 10px; padding: 1px 8px; font-size: 11px; margin: 2px 2px 0 0; }
   .steps { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; padding: 10px; background: var(--sel); border-radius: 8px; }
   .steps strong { width: 100%; font-size: 13px; }
@@ -98,7 +105,7 @@
 </head>
 <body>
 <header>
-  <h1>Promo Maker <small style="opacity:.6;font-weight:400;font-size:12px">v5</small></h1>
+  <h1>Promo Maker <small style="opacity:.6;font-weight:400;font-size:12px">v6</small></h1>
   <span class="total" id="total">—</span>
   <span class="spacer"></span>
   <button class="ghost" id="btnTemplates">Templates…</button>
@@ -109,6 +116,7 @@
 </header>
 
 <div class="fatal" id="fatal" hidden></div>
+<div class="toast" id="toast" role="status"></div>
 <input type="file" id="slotFile" hidden>
 <main>
   <!-- Media library -->
@@ -137,6 +145,7 @@
     </div>
     <div id="problems"></div>
     <ol class="seq" id="seq"></ol>
+    <div id="soundtrack"></div>
     <div class="result" id="result"></div>
   </section>
 
@@ -228,14 +237,14 @@ function renderMedia() {
   const grid = $('#mediaGrid');
   if (!media.length) { grid.innerHTML = '<p class="hint" style="grid-column:1/-1">No media yet. Import the poster, videos, photos and music for this event.</p>'; return; }
   grid.innerHTML = media.map((m, i) => `
-    <div class="media" draggable="${m.kind !== 'audio'}" data-i="${i}">
+    <div class="media" draggable="true" data-i="${i}">
       ${thumbHTML(m.name)}
       <div class="meta"><div class="name" title="${esc(m.name)}">${esc(m.name)}</div>
         <div class="muted">${m.kind}${m.width ? ` · ${m.width}×${m.height}` : ''}${m.kind !== 'image' && m.duration ? ` · ${fmt(m.duration)}` : ''}</div></div>
       <div class="actions">
         <select class="use-as" data-useas="${i}" aria-label="Use ${esc(m.name)} as">
-          <option value="">Use this file as…</option>
-          ${(ROLE_CHOICES[m.kind] || []).map(([v, l]) => `<option value="${v}">${l}</option>`).join('')}
+          ${currentUse(m.name) ? `<option value="none">Not used — remove from promo</option>` : `<option value="" selected>Use this file as…</option>`}
+          ${(ROLE_CHOICES[m.kind] || []).map(([v, l]) => `<option value="${v}" ${currentUse(m.name) === v ? 'selected' : ''}>${currentUse(m.name) === v ? '✓ ' : ''}${l}</option>`).join('')}
         </select>
         ${usesOf(m.name).map((u) => `<span class="badge">${esc(u)}</span>`).join('')}
         <button class="small danger" data-act="del" title="Delete file">✕ Delete</button>
@@ -266,6 +275,7 @@ $('#mediaGrid').addEventListener('dragstart', (e) => {
 
 function addClip(name, at = promo.clips.length) {
   const m = info(name);
+  if (m?.kind === 'audio') return useAs(name, 'music');
   const base = m.name.replace(/\.[^.]+$/, '').replace(/[-_]+/g, ' ');
   const clip = m.kind === 'image'
     ? { label: base, file: name, duration: 4, framing: m.width > m.height ? 'fit-blur' : (m.height / m.width > 1.6 ? 'fill' : 'fit-blur'), zoom: 'in', zoomAmount: 0.06 }
@@ -314,9 +324,31 @@ function usesOf(name) {
  * "Use this file as <role>": music and logo are promo settings; the step roles
  * fill the existing step of that type (an empty one first), or add a new step.
  */
+/** What a file is currently used as (first use), as a ROLE_CHOICES value. */
+function currentUse(name) {
+  if (promo.music?.file === name) return 'music';
+  if (promo.logo?.file === name) return 'logo';
+  const c = promo.clips.find((x) => x.file === name);
+  if (!c) return '';
+  const r = roleOf(c);
+  return r && ROLE_NAME[r] ? r : (info(name)?.kind === 'video' ? 'video' : 'image');
+}
+let toastTimer = null;
+function toast(msg) {
+  const t = $('#toast'); t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), 3500);
+  status(msg);
+}
 function useAs(name, role) {
-  if (role === 'music') { promo.music = { volume: 0.35, duck: true, duckAmount: 0.25, fadeIn: 1, fadeOut: 2, ...(promo.music || {}), file: name }; status(`${name} is now the background music`); return changed(); }
-  if (role === 'logo') { promo.logo = { position: 'top-right', width: 0.15, margin: 0.045, opacity: 0.92, ...(promo.logo || {}), file: name }; status(`${name} is now the logo`); return changed(); }
+  if (role === 'none') {
+    if (promo.music?.file === name) delete promo.music;
+    if (promo.logo?.file === name) delete promo.logo;
+    promo.clips.forEach((c) => { if (c.file === name) c.file = ''; });
+    toast(`${name} is no longer used in the promo`);
+    return changed();
+  }
+  if (role === 'music') { promo.music = { volume: 0.35, duck: true, duckAmount: 0.25, fadeIn: 1, fadeOut: 2, ...(promo.music || {}), file: name }; toast(`♪ ${name} is now the background music`); changed(); return flashSoundtrack(); }
+  if (role === 'logo') { promo.logo = { position: 'top-right', width: 0.15, margin: 0.045, opacity: 0.92, ...(promo.logo || {}), file: name }; toast(`◎ ${name} is now the logo (top-right corner of every frame)`); return changed(); }
   let i = -1;
   if (role !== 'image' && role !== 'video') {
     i = promo.clips.findIndex((c) => roleOf(c) === role && !info(c.file));
@@ -329,7 +361,7 @@ function useAs(name, role) {
   promo.clips[i].role = role;
   setClipFile(promo.clips[i], name);
   selected = i; tab = 'clip';
-  status(`${name} → step ${i + 1}: ${ROLE_NAME[role]}`);
+  toast(`${name} → step ${i + 1}: ${ROLE_NAME[role]}`);
   changed();
 }
 const AUDIO_ACCEPT = 'audio/*,.mp3,.m4a,.aac,.wav,.wma,.ogg,.opus,.flac,.aiff,.aif,.amr,.mp4,.webm';
@@ -371,10 +403,8 @@ $('#slotFile').onchange = async (e) => {
   try {
     const m = await api('/api/media/' + encodeURIComponent(f.name), { method: 'POST', body: f });
     media = await api('/api/media');
-    if (pickTarget === 'music') promo.music = { volume: 0.35, duck: true, duckAmount: 0.25, fadeIn: 1, fadeOut: 2, ...(promo.music || {}), file: m.name };
-    else if (pickTarget === 'logo') promo.logo = { position: 'top-right', width: 0.15, margin: 0.045, opacity: 0.92, ...(promo.logo || {}), file: m.name };
-    else if (promo.clips[pickTarget.clip]) setClipFile(promo.clips[pickTarget.clip], m.name);
-    status('Ready'); changed();
+    if (pickTarget === 'music' || pickTarget === 'logo') { status('Ready'); useAs(m.name, pickTarget); }
+    else { if (promo.clips[pickTarget.clip]) setClipFile(promo.clips[pickTarget.clip], m.name); status('Ready'); changed(); }
   } catch (err) { status('Import failed'); alert(`Could not import ${f.name}\n\n${err.message}\n\nIf this keeps happening, copy this message (and any red text in the Promo Maker terminal window) to Claude.`); }
   pickTarget = null;
 };
@@ -405,6 +435,7 @@ function renderSequence() {
   $('#extras').innerHTML =
     `♪ Music: ${mus ? `<strong>${esc(mus)}</strong>${info(mus) ? '' : ' (missing)'} <button class="small" data-clear="music">remove</button>` : '<span class="muted">none</span>'}` +
     ` &nbsp;·&nbsp; ◎ Logo: ${logo ? `<strong>${esc(logo)}</strong>${info(logo) ? '' : ' (missing)'} <button class="small" data-clear="logo">remove</button>` : '<span class="muted">none</span>'}`;
+  renderSoundtrack();
   const seq = $('#seq');
   if (!promo.clips.length) { seq.innerHTML = '<li class="empty">Use the buttons above to add steps (poster, venue video, speaker…), or “+ Add” on imported media.</li>'; return; }
   seq.innerHTML = promo.clips.map((c, i) => {
@@ -426,6 +457,34 @@ function renderSequence() {
       </div></li>`;
   }).join('');
 }
+function renderSoundtrack() {
+  const el = $('#soundtrack'); const M = promo.music; const m = M && info(M.file);
+  if (!M?.file) {
+    el.innerHTML = `<div class="soundtrack empty-music" id="musicDrop" title="Choose background music">
+      <div class="note">♪</div>
+      <div><strong>Background music: none</strong><div class="sub muted">Click here to choose an audio file (MP3, M4A, WAV, WMA…), or drag an audio file from Media onto this box.</div></div></div>`;
+  } else {
+    el.innerHTML = `<div class="soundtrack" id="musicDrop">
+      <div class="note">♪</div>
+      <div style="min-width:0"><strong>Background music</strong> · ${esc(M.file)}${m ? ` · ${fmt(m.duration)}` : ' <span style="color:var(--danger)">(file missing)</span>'}
+        <div class="sub muted">Plays under the whole promo${promo.clips.some((c) => c.keepAudio) && (M.duck ?? true) ? ', quieter while a clip’s speech plays' : ''}.</div>
+        <label class="f" style="margin:4px 0 0">Volume <span id="musVolShow">${Math.round((M.volume ?? 0.35) * 100)}%</span>
+          <input type="range" id="musVol" min="0" max="1" step="0.01" value="${M.volume ?? 0.35}"></label>
+        ${m ? `<audio src="${mediaURL(M.file)}" controls preload="none"></audio>` : ''}</div>
+      <div style="display:grid;gap:4px"><button class="small" data-music="change">Change…</button><button class="small danger" data-music="remove">✕ Remove</button></div></div>`;
+    $('#musVol').oninput = (e) => { M.volume = Number(e.target.value); $('#musVolShow').textContent = `${Math.round(M.volume * 100)}%`; changed({ redraw: false }); };
+  }
+}
+function flashSoundtrack() {
+  const d = $('#musicDrop'); if (!d) return;
+  d.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  d.animate([{ boxShadow: '0 0 0 4px #c99a2e' }, { boxShadow: '0 0 0 0 transparent' }], { duration: 1600 });
+}
+$('#soundtrack').addEventListener('click', (e) => {
+  const act = e.target.closest('[data-music]')?.dataset.music;
+  if (act === 'remove') { delete promo.music; toast('Background music removed'); return changed(); }
+  if (act === 'change' || e.target.closest('.empty-music')) pickFile('music', AUDIO_ACCEPT);
+});
 function move(from, to) {
   const [c] = promo.clips.splice(from, 1);
   promo.clips.splice(to, 0, c);
@@ -463,7 +522,11 @@ $('#seqPanel').addEventListener('drop', (e) => {
   const at = dropIndex(e);
   document.querySelectorAll('.clip').forEach((x) => x.classList.remove('drop-before'));
   const name = e.dataTransfer.getData('text/x-media');
-  if (name) { e.preventDefault(); return addClip(name, at); }
+  if (name) {
+    e.preventDefault();
+    if (info(name)?.kind === 'audio') return useAs(name, 'music');
+    return addClip(name, at);
+  }
   if (dragFrom !== null) { e.preventDefault(); move(dragFrom, at > dragFrom ? at - 1 : at); }
 });
 

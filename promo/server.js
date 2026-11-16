@@ -237,6 +237,6 @@ server.on('error', (e) => {
   throw e;
 });
 server.listen(PORT, '127.0.0.1', () => {
-  console.log(`Promo Maker v5: http://localhost:${PORT}`);
+  console.log(`Promo Maker v6: http://localhost:${PORT}`);
   console.log(`Workspace:   ${WS}`);
 });
