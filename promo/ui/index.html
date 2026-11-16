@@ -98,7 +98,7 @@
 </head>
 <body>
 <header>
-  <h1>Promo Maker <small style="opacity:.6;font-weight:400;font-size:12px">v3</small></h1>
+  <h1>Promo Maker <small style="opacity:.6;font-weight:400;font-size:12px">v4</small></h1>
   <span class="total" id="total">—</span>
   <span class="spacer"></span>
   <button class="ghost" id="btnTemplates">Templates…</button>
@@ -114,7 +114,7 @@
   <!-- Media library -->
   <section class="panel" id="mediaPanel">
     <h2><span class="grow">Media</span><button class="small" id="btnUpload">Import…</button></h2>
-    <input type="file" id="fileInput" multiple accept="image/*,video/*,audio/*" hidden>
+    <input type="file" id="fileInput" multiple accept="image/*,video/*,audio/*,.mp3,.m4a,.aac,.wav,.wma,.ogg,.opus,.flac,.aiff,.aif,.amr,.mp4,.webm" hidden>
     <div class="drop" id="dropZone"><strong>1.</strong> Import all your files (or drop them here)<br><strong>2.</strong> Set each one’s type with “Use this file as…”</div>
     <div class="media-grid" id="mediaGrid"></div>
   </section>
@@ -123,7 +123,7 @@
   <section class="panel" id="seqPanel">
     <h2><span class="grow">Sequence</span><span class="muted" style="text-transform:none;letter-spacing:0">drag to reorder</span></h2>
     <div class="steps" id="steps">
-      <strong>Add a step to the promo — then choose its file:</strong>
+      <strong>Add to the promo — each button opens your files:</strong>
       <button data-step="poster">+ Event poster</button>
       <button data-step="venue">+ Venue video</button>
       <button data-step="speaker">+ Speaker photo</button>
@@ -131,6 +131,9 @@
       <button data-step="registration">+ Registration image</button>
       <button data-step="image">+ Other image</button>
       <button data-step="video">+ Other video</button>
+      <button data-upload="music">♪ Background music</button>
+      <button data-upload="logo">◎ Logo</button>
+      <div id="extras" style="width:100%;font-size:13px"></div>
     </div>
     <div id="problems"></div>
     <ol class="seq" id="seq"></ol>
@@ -329,6 +332,7 @@ function useAs(name, role) {
   status(`${name} → step ${i + 1}: ${ROLE_NAME[role]}`);
   changed();
 }
+const AUDIO_ACCEPT = 'audio/*,.mp3,.m4a,.aac,.wav,.wma,.ogg,.opus,.flac,.aiff,.aif,.amr,.mp4,.webm';
 let pickTarget = null; // { clip: index } | 'music' | 'logo'
 function pickFile(target, accept) {
   pickTarget = target;
@@ -337,6 +341,11 @@ function pickFile(target, accept) {
   inp.click();
 }
 $('#steps').addEventListener('click', (e) => {
+  const up = e.target.closest('button[data-upload]')?.dataset.upload;
+  if (up) return pickFile(up, up === 'music' ? AUDIO_ACCEPT : 'image/*');
+  if (e.target.closest('[data-clear]')) {
+    delete promo[e.target.closest('[data-clear]').dataset.clear]; return changed();
+  }
   const key = e.target.closest('button[data-step]')?.dataset.step; if (!key) return;
   const clip = JSON.parse(JSON.stringify(STEPS[key]));
   clip.file = ''; clip.role = key;
@@ -392,6 +401,10 @@ async function upload(files) {
 
 /* ----------------------------------------------------------- sequence */
 function renderSequence() {
+  const mus = promo.music?.file, logo = promo.logo?.file;
+  $('#extras').innerHTML =
+    `♪ Music: ${mus ? `<strong>${esc(mus)}</strong>${info(mus) ? '' : ' (missing)'} <button class="small" data-clear="music">remove</button>` : '<span class="muted">none</span>'}` +
+    ` &nbsp;·&nbsp; ◎ Logo: ${logo ? `<strong>${esc(logo)}</strong>${info(logo) ? '' : ' (missing)'} <button class="small" data-clear="logo">remove</button>` : '<span class="muted">none</span>'}`;
   const seq = $('#seq');
   if (!promo.clips.length) { seq.innerHTML = '<li class="empty">Use the buttons above to add steps (poster, venue video, speaker…), or “+ Add” on imported media.</li>'; return; }
   seq.innerHTML = promo.clips.map((c, i) => {
@@ -479,7 +492,7 @@ function renderInspector() {
   const el = $('#inspector');
   if (tab === 'promo') {
     el.innerHTML = promoSettingsHTML(); bindInputs(el, promo);
-    el.querySelectorAll('[data-upload]').forEach((b) => { b.onclick = () => pickFile(b.dataset.upload, b.dataset.upload === 'music' ? 'audio/*' : 'image/*'); });
+    el.querySelectorAll('[data-upload]').forEach((b) => { b.onclick = () => pickFile(b.dataset.upload, b.dataset.upload === 'music' ? AUDIO_ACCEPT : 'image/*'); });
     return;
   }
   const c = promo.clips[selected];

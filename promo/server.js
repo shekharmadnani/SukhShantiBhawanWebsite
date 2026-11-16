@@ -47,7 +47,8 @@ const TYPES = {
   '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp', '.gif': 'image/gif',
   '.bmp': 'image/bmp', '.svg': 'image/svg+xml', '.mp4': 'video/mp4', '.m4v': 'video/mp4', '.mov': 'video/quicktime',
   '.webm': 'video/webm', '.mkv': 'video/x-matroska', '.mp3': 'audio/mpeg', '.m4a': 'audio/mp4', '.aac': 'audio/aac',
-  '.wav': 'audio/wav', '.ogg': 'audio/ogg', '.flac': 'audio/flac', '.opus': 'audio/ogg',
+  '.wav': 'audio/wav', '.ogg': 'audio/ogg', '.oga': 'audio/ogg', '.flac': 'audio/flac', '.opus': 'audio/ogg',
+  '.weba': 'audio/webm', '.wma': 'audio/x-ms-wma', '.aiff': 'audio/aiff', '.aif': 'audio/aiff', '.amr': 'audio/amr',
 };
 
 /** Keep uploaded names readable but safe: no paths, no odd characters. */
@@ -219,6 +220,6 @@ server.on('error', (e) => {
   throw e;
 });
 server.listen(PORT, '127.0.0.1', () => {
-  console.log(`Promo Maker v3: http://localhost:${PORT}`);
+  console.log(`Promo Maker v4: http://localhost:${PORT}`);
   console.log(`Workspace:   ${WS}`);
 });

@@ -34,7 +34,8 @@ const FFPROBE = process.env.FFPROBE || 'ffprobe';
 
 const IMAGE_EXT = ['.jpg', '.jpeg', '.png', '.webp', '.bmp', '.gif', '.tif', '.tiff'];
 const VIDEO_EXT = ['.mp4', '.mov', '.m4v', '.mkv', '.webm', '.avi', '.mts', '.3gp'];
-const AUDIO_EXT = ['.mp3', '.m4a', '.aac', '.wav', '.ogg', '.flac', '.opus'];
+const AUDIO_EXT = ['.mp3', '.m4a', '.aac', '.wav', '.ogg', '.oga', '.flac', '.opus', '.wma', '.aiff', '.aif',
+  '.amr', '.mka', '.weba', '.m4b', '.3ga', '.caf', '.ac3'];
 
 const FRAMINGS = ['fill', 'fit-blur', 'fit', 'manual'];
 const TRANSITIONS = ['fade', 'fadeblack', 'fadewhite', 'dissolve', 'slideleft', 'slideup',
@@ -103,7 +104,10 @@ function probe(file) {
     Number(((v.side_data_list || []).find((d) => d.rotation !== undefined) || {}).rotation) || 0);
   if (Math.abs(rot) % 180 === 90) [width, height] = [height, width];
   const duration = Number((info.format || {}).duration) || Number(v && v.duration) || 0;
-  return { kind: kindOf(file), width, height, duration, hasAudio: !!a };
+  // An .mp4/.webm with sound but no picture (phone recordings, downloaded
+  // tracks) is audio, whatever its extension says.
+  const kind = !v && a ? 'audio' : kindOf(file);
+  return { kind, width, height, duration, hasAudio: !!a };
 }
 
 /* ------------------------------------------------------------ template --- */
