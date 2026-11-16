@@ -24,7 +24,7 @@
   button.small { padding: 2px 8px; font-size: 12px; }
   button.danger { color: var(--danger); }
   button:disabled { opacity: .5; cursor: default; }
-  main { display: grid; grid-template-columns: 260px minmax(280px, 1fr) 380px; gap: 12px; padding: 12px; align-items: start; }
+  main { display: grid; grid-template-columns: 300px minmax(280px, 1fr) 380px; gap: 12px; padding: 12px; align-items: start; }
   @media (max-width: 1100px) { main { grid-template-columns: 1fr 1fr; } #inspectorPanel { grid-column: 1 / -1; } }
   @media (max-width: 700px) { main { grid-template-columns: 1fr; } }
   section.panel { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 12px; min-width: 0; }
@@ -32,7 +32,9 @@
   .panel h2 .grow { flex: 1; }
   .drop { border: 2px dashed var(--line); border-radius: var(--radius); padding: 10px; text-align: center; color: var(--muted); margin-bottom: 10px; }
   .drop.over { border-color: var(--accent); background: var(--sel); }
-  .media-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .media-grid { display: grid; grid-template-columns: 1fr; gap: 8px; }
+  .media { display: grid; grid-template-columns: 92px 1fr; }
+  .media > .thumb { grid-row: span 2; height: 100%; min-height: 92px; aspect-ratio: auto; }
   .media { border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: #fff; cursor: grab; }
   .thumb { width: 100%; aspect-ratio: 16/10; object-fit: cover; display: block; background: #222; }
   .media .meta { padding: 4px 6px; font-size: 11px; }
@@ -84,6 +86,8 @@
   .err-pre { white-space: pre-wrap; font: 12px/1.4 ui-monospace, monospace; background: #fbeae6; color: var(--danger); padding: 8px; border-radius: 6px; max-height: 200px; overflow: auto; }
   input[type=range] { width: 100%; }
   .muted { color: var(--muted); }
+  .use-as { width: 100%; padding: 5px 6px; border: 2px solid var(--gold); border-radius: 6px; background: #fff8e6; font-weight: 600; font-size: 13px; }
+  .badge { display: inline-block; background: var(--accent); color: #fff; border-radius: 10px; padding: 1px 8px; font-size: 11px; margin: 2px 2px 0 0; }
   .steps { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; padding: 10px; background: var(--sel); border-radius: 8px; }
   .steps strong { width: 100%; font-size: 13px; }
   .steps button { font-size: 13px; }
@@ -94,7 +98,7 @@
 </head>
 <body>
 <header>
-  <h1>Promo Maker</h1>
+  <h1>Promo Maker <small style="opacity:.6;font-weight:400;font-size:12px">v3</small></h1>
   <span class="total" id="total">—</span>
   <span class="spacer"></span>
   <button class="ghost" id="btnTemplates">Templates…</button>
@@ -111,7 +115,7 @@
   <section class="panel" id="mediaPanel">
     <h2><span class="grow">Media</span><button class="small" id="btnUpload">Import…</button></h2>
     <input type="file" id="fileInput" multiple accept="image/*,video/*,audio/*" hidden>
-    <div class="drop" id="dropZone">Drop images, videos and music here</div>
+    <div class="drop" id="dropZone"><strong>1.</strong> Import all your files (or drop them here)<br><strong>2.</strong> Set each one’s type with “Use this file as…”</div>
     <div class="media-grid" id="mediaGrid"></div>
   </section>
 
@@ -226,12 +230,19 @@ function renderMedia() {
       <div class="meta"><div class="name" title="${esc(m.name)}">${esc(m.name)}</div>
         <div class="muted">${m.kind}${m.width ? ` · ${m.width}×${m.height}` : ''}${m.kind !== 'image' && m.duration ? ` · ${fmt(m.duration)}` : ''}</div></div>
       <div class="actions">
-        ${m.kind !== 'audio' ? `<button class="small" data-act="add" title="Add to the end of the promo">+ Add</button>` : `<button class="small" data-act="music">Use as music</button>`}
-        ${m.kind === 'image' ? `<button class="small" data-act="logo">Logo</button>` : ''}
-        <button class="small danger" data-act="del" title="Delete file">✕</button>
+        <select class="use-as" data-useas="${i}" aria-label="Use ${esc(m.name)} as">
+          <option value="">Use this file as…</option>
+          ${(ROLE_CHOICES[m.kind] || []).map(([v, l]) => `<option value="${v}">${l}</option>`).join('')}
+        </select>
+        ${usesOf(m.name).map((u) => `<span class="badge">${esc(u)}</span>`).join('')}
+        <button class="small danger" data-act="del" title="Delete file">✕ Delete</button>
       </div>
     </div>`).join('');
 }
+$('#mediaGrid').addEventListener('change', (e) => {
+  const sel = e.target.closest('select[data-useas]'); if (!sel || !sel.value) return;
+  useAs(media[sel.dataset.useas].name, sel.value);
+});
 $('#mediaGrid').addEventListener('click', async (e) => {
   const b = e.target.closest('button'); if (!b) return;
   const m = media[e.target.closest('.media').dataset.i];
@@ -274,6 +285,50 @@ const STEPS = {
   image: { label: 'Image', expects: 'image', duration: 4, framing: 'fit-blur', zoom: 'in', zoomAmount: 0.06 },
   video: { label: 'Video clip', expects: 'video', start: 0, end: 6, framing: 'fill' },
 };
+// What each kind of file can be used as, shown in the media cards.
+const ROLE_CHOICES = {
+  image: [['poster', 'Event poster'], ['speaker', 'Speaker photo'], ['registration', 'Registration image'],
+    ['image', 'Other image (new step)'], ['logo', 'Logo (corner of every frame)']],
+  video: [['venue', 'Venue video'], ['highlights', 'Highlights video'], ['video', 'Other video (new step)']],
+  audio: [['music', 'Background music']],
+};
+const ROLE_NAME = { poster: 'Event poster', venue: 'Venue video', speaker: 'Speaker photo', highlights: 'Highlights video',
+  registration: 'Registration image', image: 'Image', video: 'Video', logo: 'Logo', music: 'Music' };
+// Promos saved before steps had a role: recognise them by their label.
+const LABEL_ROLE = { 'event poster': 'poster', 'venue video': 'venue', 'speaker photograph': 'speaker', 'speaker photo': 'speaker',
+  'event highlights': 'highlights', 'event highlights video': 'highlights', 'highlights video': 'highlights',
+  'registration': 'registration', 'registration image': 'registration' };
+const roleOf = (c) => c.role || LABEL_ROLE[String(c.label || '').toLowerCase()] || null;
+/** Where a file is used in the promo, e.g. ["Step 3: Speaker photo", "Logo"]. */
+function usesOf(name) {
+  const u = [];
+  promo.clips.forEach((c, i) => { if (c.file === name) u.push(`Step ${i + 1}: ${ROLE_NAME[roleOf(c)] || c.label || 'clip'}`); });
+  if (promo.music?.file === name) u.push('Music');
+  if (promo.logo?.file === name) u.push('Logo');
+  return u;
+}
+/**
+ * "Use this file as <role>": music and logo are promo settings; the step roles
+ * fill the existing step of that type (an empty one first), or add a new step.
+ */
+function useAs(name, role) {
+  if (role === 'music') { promo.music = { volume: 0.35, duck: true, duckAmount: 0.25, fadeIn: 1, fadeOut: 2, ...(promo.music || {}), file: name }; status(`${name} is now the background music`); return changed(); }
+  if (role === 'logo') { promo.logo = { position: 'top-right', width: 0.15, margin: 0.045, opacity: 0.92, ...(promo.logo || {}), file: name }; status(`${name} is now the logo`); return changed(); }
+  let i = -1;
+  if (role !== 'image' && role !== 'video') {
+    i = promo.clips.findIndex((c) => roleOf(c) === role && !info(c.file));
+    if (i < 0) i = promo.clips.findIndex((c) => roleOf(c) === role);
+  }
+  if (i < 0) {
+    promo.clips.push({ ...JSON.parse(JSON.stringify(STEPS[role])), role, file: '' });
+    i = promo.clips.length - 1;
+  }
+  promo.clips[i].role = role;
+  setClipFile(promo.clips[i], name);
+  selected = i; tab = 'clip';
+  status(`${name} → step ${i + 1}: ${ROLE_NAME[role]}`);
+  changed();
+}
 let pickTarget = null; // { clip: index } | 'music' | 'logo'
 function pickFile(target, accept) {
   pickTarget = target;
@@ -284,7 +339,7 @@ function pickFile(target, accept) {
 $('#steps').addEventListener('click', (e) => {
   const key = e.target.closest('button[data-step]')?.dataset.step; if (!key) return;
   const clip = JSON.parse(JSON.stringify(STEPS[key]));
-  clip.file = '';
+  clip.file = ''; clip.role = key;
   promo.clips.push(clip);
   selected = promo.clips.length - 1; tab = 'clip';
   changed();
@@ -347,7 +402,7 @@ function renderSequence() {
     return `<li class="clip${i === selected && tab === 'clip' ? ' selected' : ''}" draggable="true" data-i="${i}">
       <span class="num">${i + 1}</span>
       ${thumbHTML(c.file, 'thumb', c.start || 0.5)}
-      <div><div class="title">${esc(c.label || c.file)}</div>
+      <div><div class="title">${esc(c.label || c.file)}${roleOf(c) ? ` <span class="badge">${ROLE_NAME[roleOf(c)]}</span>` : ''}</div>
         <div class="sub">${m ? `${m.kind} · ${esc(c.file)}` : (c.file ? `missing: ${esc(c.file)}` : 'no file chosen yet')} · ${dur}</div>
         <div class="sub">${esc(extras)}</div>
         <button class="small${m ? '' : ' pick'}" data-act="pick" style="margin-top:4px">${m ? 'Change file…' : '📁 Choose file…'}</button></div>
@@ -433,6 +488,9 @@ function renderInspector() {
   const kind = m?.kind;
   const sameKind = media.filter((x) => x.kind === 'image' || x.kind === 'video');
   el.innerHTML = `
+    ${field('Step type', select('role', roleOf(c) || (c.expects === 'video' || kind === 'video' ? 'video' : 'image'),
+      { poster: 'Event poster', venue: 'Venue video', speaker: 'Speaker photo', highlights: 'Highlights video', registration: 'Registration image', image: 'Other image', video: 'Other video' }),
+      'Changing the type applies its usual settings (framing, zoom, caption, sound).')}
     ${field('Label (for you; not shown in the video)', text('label', c.label))}
     <div style="display:flex;gap:8px;align-items:end">
       <div style="flex:1;min-width:0">${field('File for this step', select('file', c.file, Object.fromEntries([[c.file, c.file ? c.file + (m ? '' : ' (missing)') : '— none chosen —'], ...sameKind.map((x) => [x.name, `${x.name} — ${x.kind}`])])))}</div>
@@ -538,6 +596,13 @@ function bindInputs(root, obj) {
       else if (k === 'logo.file' && !v) { delete obj.logo; }
       else setPath(obj, k, v);
       if (k.startsWith('caption.') && obj.caption && !obj.caption.title && !obj.caption.subtitle) delete obj.caption;
+      if (k === 'role') { // new step type: take its usual settings, keep the file and timing
+        const { label, expects, ...preset } = JSON.parse(JSON.stringify(STEPS[v]));
+        for (const key of ['framing', 'zoom', 'zoomAmount', 'keepAudio', 'caption']) delete obj[key];
+        Object.assign(obj, Object.fromEntries(Object.entries(preset).filter(([key]) => !['duration', 'start', 'end'].includes(key) || obj[key] === undefined)));
+        if (!obj.label || Object.values(STEPS).some((st) => st.label === obj.label) || LABEL_ROLE[obj.label.toLowerCase()]) obj.label = label;
+        if (info(obj.file)?.kind !== 'video') { delete obj.keepAudio; delete obj.start; delete obj.end; obj.duration ??= 4; }
+      }
       if (k === 'file') setClipFile(obj, v); // swapped media: refit timing to the new file
       if (live) {
         const show = root.querySelector(`[data-show="${k}"]`);
@@ -546,7 +611,7 @@ function bindInputs(root, obj) {
         return changed({ redraw: false });
       }
       // Structural changes re-draw the panel; plain edits only refresh the list.
-      const structural = ['framing', 'file', 'keepAudio', 'music.file', 'music.duck', 'logo.file'].includes(k);
+      const structural = ['role', 'framing', 'file', 'keepAudio', 'music.file', 'music.duck', 'logo.file'].includes(k);
       if (structural) changed(); else { renderSequence(); if (tab === 'clip') drawFrame(obj); changed({ redraw: false }); }
     });
   });

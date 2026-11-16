@@ -49,9 +49,9 @@ node promo/render.js promo/workspace/promo.json --preview  # half size, ~3× fas
 | Panel | What it does |
 |---|---|
 | **Add a step** | Buttons for each part of an event promo: **Event poster**, **Venue video**, **Speaker photo**, **Highlights video**, **Registration image**, or any other image or video. Each one adds a step with suitable settings and opens the file dialog so you can choose its file. Every step also has a **Choose file… / Change file…** button. |
-| **Media** | Import or drag in images, videos and music. **+ Add** puts an item at the end of the sequence; you can also drag it to a position. Audio gets **Use as music**, images get **Logo**. |
+| **Media** | Import or drag in all your files, then set each one's type with its **Use this file as…** dropdown. Images: Event poster, Speaker photo, Registration image, Other image, Logo. Videos: Venue video, Highlights video, Other video. Audio: Background music. A file set to a step type fills that step (or adds it); badges show where each file is used. You can also drag a file into the sequence. |
 | **Sequence** | The promo in order. Drag cards (or use ↑ ↓) to reorder. Problems, such as a missing file or an end point past the end of a video, are listed above it before you render. |
-| **Clip** | The selected clip: a 9:16 framing preview that matches the render, framing mode, duration or start/end (scrub the video and press **Start here** / **End here**), keep speech, zoom, transition and caption. In **Manual position**, drag the picture to choose what stays in frame. |
+| **Clip** | The selected clip: its **step type** (changing it applies that type's usual settings), a 9:16 framing preview that matches the render, framing mode, duration or start/end (scrub the video and press **Start here** / **End here**), keep speech, zoom, transition and caption. In **Manual position**, drag the picture to choose what stays in frame. |
 | **Promo settings** | **Music** and **Logo**, each with its own **Upload…** button, plus output size, transitions, fades, music (volume, ducking under speech), logo (corner, size, opacity), caption colours and font. |
 | **Preview / Export** | Preview renders at half size (about 8 s for a 25 s promo); Export renders the final MP4 into `workspace/out/`. |
 | **Templates…** | Save the current promo as a reusable template, or start from one. |
