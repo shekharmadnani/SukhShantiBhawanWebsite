@@ -84,6 +84,12 @@
   .err-pre { white-space: pre-wrap; font: 12px/1.4 ui-monospace, monospace; background: #fbeae6; color: var(--danger); padding: 8px; border-radius: 6px; max-height: 200px; overflow: auto; }
   input[type=range] { width: 100%; }
   .muted { color: var(--muted); }
+  .steps { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; padding: 10px; background: var(--sel); border-radius: 8px; }
+  .steps strong { width: 100%; font-size: 13px; }
+  .steps button { font-size: 13px; }
+  .pick { background: var(--gold); border-color: var(--gold); color: #1d1606; font-weight: 600; }
+  .fatal { margin: 12px; padding: 16px 20px; background: #fbeae6; color: var(--danger); border-radius: var(--radius); border: 1px solid #e6b8ae; font-size: 15px; }
+  .fatal code { background: #fff; padding: 2px 6px; border-radius: 4px; color: var(--ink); }
 </style>
 </head>
 <body>
@@ -98,6 +104,8 @@
   <span id="status">Ready</span>
 </header>
 
+<div class="fatal" id="fatal" hidden></div>
+<input type="file" id="slotFile" hidden>
 <main>
   <!-- Media library -->
   <section class="panel" id="mediaPanel">
@@ -110,6 +118,16 @@
   <!-- Sequence -->
   <section class="panel" id="seqPanel">
     <h2><span class="grow">Sequence</span><span class="muted" style="text-transform:none;letter-spacing:0">drag to reorder</span></h2>
+    <div class="steps" id="steps">
+      <strong>Add a step to the promo — then choose its file:</strong>
+      <button data-step="poster">+ Event poster</button>
+      <button data-step="venue">+ Venue video</button>
+      <button data-step="speaker">+ Speaker photo</button>
+      <button data-step="highlights">+ Highlights video</button>
+      <button data-step="registration">+ Registration image</button>
+      <button data-step="image">+ Other image</button>
+      <button data-step="video">+ Other video</button>
+    </div>
     <div id="problems"></div>
     <ol class="seq" id="seq"></ol>
     <div class="result" id="result"></div>
@@ -161,7 +179,11 @@ const FRAMING_LABEL = {
 };
 
 /* ------------------------------------------------------- load and save */
+function fatal(html) { const f = $('#fatal'); f.innerHTML = html; f.hidden = false; }
 async function load() {
+  if (location.protocol === 'file:') {
+    throw new Error('file');
+  }
   [promo, media] = await Promise.all([api('/api/project'), api('/api/media')]);
   promo.clips ||= [];
   renderAll();
@@ -204,7 +226,7 @@ function renderMedia() {
       <div class="meta"><div class="name" title="${esc(m.name)}">${esc(m.name)}</div>
         <div class="muted">${m.kind}${m.width ? ` · ${m.width}×${m.height}` : ''}${m.kind !== 'image' && m.duration ? ` · ${fmt(m.duration)}` : ''}</div></div>
       <div class="actions">
-        ${m.kind !== 'audio' ? `<button class="small" data-act="add">+ Add</button>` : `<button class="small" data-act="music">Use as music</button>`}
+        ${m.kind !== 'audio' ? `<button class="small" data-act="add" title="Add to the end of the promo">+ Add</button>` : `<button class="small" data-act="music">Use as music</button>`}
         ${m.kind === 'image' ? `<button class="small" data-act="logo">Logo</button>` : ''}
         <button class="small danger" data-act="del" title="Delete file">✕</button>
       </div>
@@ -239,6 +261,60 @@ function addClip(name, at = promo.clips.length) {
   changed();
 }
 
+/* ------------------------------------------- steps (roles) and slots */
+// Each preset is one kind of step in an event promo, with sensible settings.
+const STEPS = {
+  poster: { label: 'Event poster', expects: 'image', duration: 4, framing: 'fit-blur', zoom: 'in', zoomAmount: 0.06 },
+  venue: { label: 'Venue video', expects: 'video', start: 0, end: 6, framing: 'fill' },
+  speaker: { label: 'Speaker photograph', expects: 'image', duration: 4, framing: 'fill', zoom: 'in', zoomAmount: 0.05,
+    caption: { title: 'Speaker name', subtitle: 'Title', position: 'bottom' } },
+  highlights: { label: 'Event highlights video', expects: 'video', start: 0, end: 8, framing: 'fit-blur', keepAudio: true },
+  registration: { label: 'Registration image', expects: 'image', duration: 5, framing: 'fit-blur',
+    caption: { title: 'Register now — entry free', position: 'top' } },
+  image: { label: 'Image', expects: 'image', duration: 4, framing: 'fit-blur', zoom: 'in', zoomAmount: 0.06 },
+  video: { label: 'Video clip', expects: 'video', start: 0, end: 6, framing: 'fill' },
+};
+let pickTarget = null; // { clip: index } | 'music' | 'logo'
+function pickFile(target, accept) {
+  pickTarget = target;
+  const inp = $('#slotFile');
+  inp.accept = accept; inp.value = '';
+  inp.click();
+}
+$('#steps').addEventListener('click', (e) => {
+  const key = e.target.closest('button[data-step]')?.dataset.step; if (!key) return;
+  const clip = JSON.parse(JSON.stringify(STEPS[key]));
+  clip.file = '';
+  promo.clips.push(clip);
+  selected = promo.clips.length - 1; tab = 'clip';
+  changed();
+  pickFile({ clip: selected }, clip.expects === 'video' ? 'video/*' : 'image/*');
+});
+/** Point a clip at a (new) file, keeping the step's settings where they still fit. */
+function setClipFile(c, name) {
+  const m = info(name);
+  c.file = name;
+  if (!m) return;
+  c.expects = m.kind;
+  if (m.kind === 'video') {
+    const len = (c.end - c.start) > 0 ? c.end - c.start : 6;
+    delete c.duration; c.start = 0; c.end = Math.round(Math.min(m.duration, len) * 10) / 10;
+  } else { delete c.start; delete c.end; delete c.keepAudio; c.duration ??= 4; }
+}
+$('#slotFile').onchange = async (e) => {
+  const f = e.target.files[0]; if (!f || !pickTarget) return;
+  status(`Importing ${f.name}…`);
+  try {
+    const m = await api('/api/media/' + encodeURIComponent(f.name), { method: 'POST', body: f });
+    media = await api('/api/media');
+    if (pickTarget === 'music') promo.music = { volume: 0.35, duck: true, duckAmount: 0.25, fadeIn: 1, fadeOut: 2, ...(promo.music || {}), file: m.name };
+    else if (pickTarget === 'logo') promo.logo = { position: 'top-right', width: 0.15, margin: 0.045, opacity: 0.92, ...(promo.logo || {}), file: m.name };
+    else if (promo.clips[pickTarget.clip]) setClipFile(promo.clips[pickTarget.clip], m.name);
+    status('Ready'); changed();
+  } catch (err) { status('Import failed'); alert(`${f.name}: ${err.message}`); }
+  pickTarget = null;
+};
+
 // Upload: file picker or drag-and-drop from the desktop.
 $('#btnUpload').onclick = () => $('#fileInput').click();
 $('#fileInput').onchange = (e) => upload([...e.target.files]);
@@ -262,17 +338,19 @@ async function upload(files) {
 /* ----------------------------------------------------------- sequence */
 function renderSequence() {
   const seq = $('#seq');
-  if (!promo.clips.length) { seq.innerHTML = '<li class="empty">Add media with “+ Add”, or drag it here.</li>'; return; }
+  if (!promo.clips.length) { seq.innerHTML = '<li class="empty">Use the buttons above to add steps (poster, venue video, speaker…), or “+ Add” on imported media.</li>'; return; }
   seq.innerHTML = promo.clips.map((c, i) => {
     const m = info(c.file);
-    const dur = m?.kind === 'video' ? `${fmt(c.start || 0)} → ${fmt(c.end)} (${fmt((c.end || 0) - (c.start || 0))})` : fmt(c.duration || 4);
+    const dur = (m?.kind || c.expects) === 'video' ? `${fmt(c.start || 0)} → ${fmt(c.end)} (${fmt((c.end || 0) - (c.start || 0))})` : fmt(c.duration || 4);
     const extras = [FRAMING_LABEL[c.framing] || c.framing, c.zoom && c.zoom !== 'none' ? `zoom ${c.zoom}` : '',
       c.caption?.title ? `“${c.caption.title}”` : '', c.keepAudio ? 'keeps sound' : ''].filter(Boolean).join(' · ');
     return `<li class="clip${i === selected && tab === 'clip' ? ' selected' : ''}" draggable="true" data-i="${i}">
       <span class="num">${i + 1}</span>
       ${thumbHTML(c.file, 'thumb', c.start || 0.5)}
       <div><div class="title">${esc(c.label || c.file)}</div>
-        <div class="sub">${m ? m.kind : 'missing file'} · ${dur}</div><div class="sub">${esc(extras)}</div></div>
+        <div class="sub">${m ? `${m.kind} · ${esc(c.file)}` : (c.file ? `missing: ${esc(c.file)}` : 'no file chosen yet')} · ${dur}</div>
+        <div class="sub">${esc(extras)}</div>
+        <button class="small${m ? '' : ' pick'}" data-act="pick" style="margin-top:4px">${m ? 'Change file…' : '📁 Choose file…'}</button></div>
       <div style="display:grid;gap:4px">
         <button class="small" data-act="up" ${i === 0 ? 'disabled' : ''} title="Move up">↑</button>
         <button class="small" data-act="down" ${i === promo.clips.length - 1 ? 'disabled' : ''} title="Move down">↓</button>
@@ -289,6 +367,7 @@ $('#seq').addEventListener('click', (e) => {
   const li = e.target.closest('.clip'); if (!li) return;
   const i = Number(li.dataset.i);
   const act = e.target.closest('button')?.dataset.act;
+  if (act === 'pick') { selected = i; tab = 'clip'; renderAll(); const c = promo.clips[i]; return pickFile({ clip: i }, c.expects === 'video' ? 'video/*' : c.expects === 'image' ? 'image/*' : 'image/*,video/*'); }
   if (act === 'up') return move(i, i - 1);
   if (act === 'down') return move(i, i + 1);
   if (act === 'remove') { promo.clips.splice(i, 1); selected = Math.min(selected, promo.clips.length - 1); return changed(); }
@@ -343,7 +422,11 @@ function renderInspector() {
   $('#tabClip').setAttribute('aria-selected', tab === 'clip');
   $('#tabPromo').setAttribute('aria-selected', tab === 'promo');
   const el = $('#inspector');
-  if (tab === 'promo') { el.innerHTML = promoSettingsHTML(); bindInputs(el, promo); return; }
+  if (tab === 'promo') {
+    el.innerHTML = promoSettingsHTML(); bindInputs(el, promo);
+    el.querySelectorAll('[data-upload]').forEach((b) => { b.onclick = () => pickFile(b.dataset.upload, b.dataset.upload === 'music' ? 'audio/*' : 'image/*'); });
+    return;
+  }
   const c = promo.clips[selected];
   if (!c) { el.innerHTML = '<p class="hint">Select a clip in the sequence to edit it.</p>'; return; }
   const m = info(c.file);
@@ -351,8 +434,11 @@ function renderInspector() {
   const sameKind = media.filter((x) => x.kind === 'image' || x.kind === 'video');
   el.innerHTML = `
     ${field('Label (for you; not shown in the video)', text('label', c.label))}
-    ${field('Media', select('file', c.file, Object.fromEntries([[c.file, c.file + (m ? '' : ' (missing)')], ...sameKind.map((x) => [x.name, `${x.name} — ${x.kind}`])])),
-      'Swap the file to reuse this template for a new event.')}
+    <div style="display:flex;gap:8px;align-items:end">
+      <div style="flex:1;min-width:0">${field('File for this step', select('file', c.file, Object.fromEntries([[c.file, c.file ? c.file + (m ? '' : ' (missing)') : '— none chosen —'], ...sameKind.map((x) => [x.name, `${x.name} — ${x.kind}`])])))}</div>
+      <button class="${m ? '' : 'pick'}" id="pickHere" style="margin-bottom:8px">📁 Upload…</button>
+    </div>
+    <p class="hint" style="margin-top:-4px">Upload a file from your computer, or pick one you already imported. Swap files to reuse this layout for a new event.</p>
     <div class="frame-wrap">
       <div class="frame${c.framing === 'manual' ? ' manual' : ''}" id="frame"></div>
       <div style="flex:1;min-width:0">
@@ -380,6 +466,7 @@ function renderInspector() {
           : '<p class="hint">This video has no sound.</p>'}
       </fieldset>` : kind === 'image' ? `
       ${field('Show for (seconds)', number('duration', c.duration ?? 4, 0.5, 1, 30))}` : ''}
+    ${!m ? `<p class="hint">Choose a file to set ${c.expects === 'video' ? 'which part of the video plays' : 'timing'} and see the framing.</p>` : ''}
     <fieldset><legend>Motion</legend>
       <div class="row">${field('Gentle zoom', select('zoom', c.zoom || 'none', { none: 'None', in: 'Zoom in', out: 'Zoom out' }))}
       ${field(`Amount <span data-show="zoomAmount">${Math.round((c.zoomAmount ?? 0.08) * 100)}%</span>`, range('zoomAmount', c.zoomAmount ?? 0.08, 0.02, 0.2, 0.01))}</div>
@@ -391,6 +478,7 @@ function renderInspector() {
       ${field('Position', select('caption.position', c.caption?.position || 'bottom', { bottom: 'Bottom', center: 'Centre', top: 'Top' }))}
     </fieldset>`;
   bindInputs(el, c);
+  $('#pickHere').onclick = () => pickFile({ clip: selected }, c.expects === 'video' ? 'video/*' : c.expects === 'image' ? 'image/*' : 'image/*,video/*');
   drawFrame(c);
   if (kind === 'video') bindTrim(c);
 }
@@ -411,16 +499,19 @@ function promoSettingsHTML() {
       <div class="row">${field('Fade in from black (s)', number('fadeIn', promo.fadeIn ?? 0.4, 0.1, 0, 3))}${field('Fade out at end (s)', number('fadeOut', promo.fadeOut ?? 0.8, 0.1, 0, 3))}</div>
     </fieldset>
     <fieldset><legend>Music</legend>
-      ${field('Track', select('music.file', M.file || '', { '': 'No music', ...Object.fromEntries(audio.map((a) => [a.name, a.name])) }))}
+      <div style="display:flex;gap:8px;align-items:end"><div style="flex:1;min-width:0">${field('Track', select('music.file', M.file || '', { '': 'No music', ...Object.fromEntries(audio.map((a) => [a.name, a.name])) }))}</div>
+      <button data-upload="music" class="${M.file ? '' : 'pick'}" style="margin-bottom:8px">📁 Upload…</button></div>
       ${M.file ? `
         ${field(`Volume <span data-show="music.volume">${Math.round((M.volume ?? 0.35) * 100)}%</span>`, range('music.volume', M.volume ?? 0.35, 0, 1, 0.01))}
         ${check('music.duck', M.duck ?? true, 'Lower the music while a clip’s speech is playing')}
         ${M.duck ?? true ? field(`Music under speech <span data-show="music.duckAmount">${Math.round((M.duckAmount ?? 0.25) * 100)}%</span>`, range('music.duckAmount', M.duckAmount ?? 0.25, 0.05, 1, 0.05)) : ''}
         <div class="row3">${field('Start at (s)', number('music.start', M.start ?? 0, 1, 0))}${field('Fade in (s)', number('music.fadeIn', M.fadeIn ?? 1, 0.5, 0, 10))}${field('Fade out (s)', number('music.fadeOut', M.fadeOut ?? 2, 0.5, 0, 10))}</div>
-        <audio src="${mediaURL(M.file)}" controls style="width:100%"></audio>` : '<p class="hint">Import an audio file, then choose it here.</p>'}
+        <audio src="${mediaURL(M.file)}" controls style="width:100%"></audio>` : '<p class="hint">Upload an MP3, M4A or WAV file.</p>'}
     </fieldset>
     <fieldset><legend>Logo</legend>
-      ${field('Image', select('logo.file', L.file || '', { '': 'No logo', ...Object.fromEntries(images.map((a) => [a.name, a.name])) }), 'A PNG with a transparent background looks best.')}
+      <div style="display:flex;gap:8px;align-items:end"><div style="flex:1;min-width:0">${field('Image', select('logo.file', L.file || '', { '': 'No logo', ...Object.fromEntries(images.map((a) => [a.name, a.name])) }))}</div>
+      <button data-upload="logo" class="${L.file ? '' : 'pick'}" style="margin-bottom:8px">📁 Upload…</button></div>
+      <p class="hint" style="margin-top:-4px">A PNG with a transparent background looks best.</p>
       ${L.file ? `<div class="row">${field('Corner', select('logo.position', L.position || 'top-right', { 'top-right': 'Top right', 'top-left': 'Top left', 'top-center': 'Top centre', 'bottom-right': 'Bottom right', 'bottom-left': 'Bottom left', 'bottom-center': 'Bottom centre' }))}
         ${field(`Size <span data-show="logo.width">${Math.round((L.width ?? 0.15) * 100)}%</span>`, range('logo.width', L.width ?? 0.15, 0.05, 0.4, 0.01))}</div>
         ${field(`Opacity <span data-show="logo.opacity">${Math.round((L.opacity ?? 0.92) * 100)}%</span>`, range('logo.opacity', L.opacity ?? 0.92, 0.2, 1, 0.01))}` : ''}
@@ -447,11 +538,7 @@ function bindInputs(root, obj) {
       else if (k === 'logo.file' && !v) { delete obj.logo; }
       else setPath(obj, k, v);
       if (k.startsWith('caption.') && obj.caption && !obj.caption.title && !obj.caption.subtitle) delete obj.caption;
-      if (k === 'file') { // swapped media: reset fields that belong to the old file
-        const m = info(v);
-        if (m?.kind === 'video') { delete obj.duration; obj.start = 0; obj.end = Math.min(m.duration, 6); }
-        else { delete obj.start; delete obj.end; delete obj.keepAudio; obj.duration ??= 4; }
-      }
+      if (k === 'file') setClipFile(obj, v); // swapped media: refit timing to the new file
       if (live) {
         const show = root.querySelector(`[data-show="${k}"]`);
         if (show) show.textContent = k === 'scale' ? `${v.toFixed(2)}×` : `${Math.round(v * 100)}%`;
@@ -599,7 +686,13 @@ $('#btnSaveTpl').onclick = async (e) => {
 
 $('#btnPreview').onclick = () => startRender(true);
 $('#btnExport').onclick = () => startRender(false);
-load().then(poll).catch((e) => status(e.message));
+load().then(poll).catch((e) => {
+  status('Not connected');
+  fatal(`<strong>The editor can’t reach its server.</strong><br>
+    This page only works when opened through the Promo Maker server, not by double-clicking the HTML file.<br>
+    In a terminal, in the project folder, run <code>npm run promo</code>, keep that window open,
+    and then open <code>http://localhost:8090</code> in your browser.`);
+});
 </script>
 </body>
 </html>
