@@ -150,7 +150,7 @@ function prepare(template, baseDir) {
   const clips = (t.clips || []).map((c, i) => {
     const label = `Clip ${i + 1}${c.label ? ` (${c.label})` : ''}`;
     const clip = { ...c, label, file: resolve(c.file) };
-    if (!c.file) { problems.push(`${label}: no media file chosen`); return clip; }
+    if (!c.file) { problems.push(`${label}: no file chosen yet — click “Choose file…” on this step, or set an imported file’s type with “Use this file as…”`); return clip; }
     if (!fs.existsSync(clip.file)) { problems.push(`${label}: file not found — ${c.file}`); return clip; }
     clip.type = kindOf(clip.file);
     if (clip.type !== 'image' && clip.type !== 'video') {
@@ -209,13 +209,13 @@ function prepare(template, baseDir) {
       position: 'top-right', width: 0.16, margin: 0.04, opacity: 0.9,
       ...t.logo, file: resolve(t.logo.file),
     };
-    if (!fs.existsSync(logo.file)) { problems.push(`Logo file not found: ${t.logo.file}`); logo = null; }
+    if (!fs.existsSync(logo.file)) { problems.push(`Logo file not found: ${t.logo.file} — choose a logo in Promo settings, or set it to “No logo”`); logo = null; }
   }
 
   let music = null;
   if (t.music && t.music.file) {
     music = { volume: 0.35, start: 0, duck: true, duckAmount: 0.25, fadeIn: 1, fadeOut: 2, ...t.music, file: resolve(t.music.file) };
-    if (!fs.existsSync(music.file)) { problems.push(`Music file not found: ${t.music.file}`); music = null; }
+    if (!fs.existsSync(music.file)) { problems.push(`Music file not found: ${t.music.file} — upload a track in Promo settings, or set it to “No music”`); music = null; }
   }
 
   const promo = {

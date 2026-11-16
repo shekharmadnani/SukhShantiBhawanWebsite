@@ -31,7 +31,16 @@ const USER_TEMPLATES = path.join(WS, 'templates');
 const BUILTIN_TEMPLATES = path.join(__dirname, 'templates');
 const PROMO = path.join(WS, 'promo.json');
 for (const d of [MEDIA, OUT, USER_TEMPLATES]) fs.mkdirSync(d, { recursive: true });
-if (!fs.existsSync(PROMO)) fs.copyFileSync(path.join(BUILTIN_TEMPLATES, 'bk-event.json'), PROMO);
+// A new workspace starts from the event template. Its steps keep their types
+// and settings, but any file not actually in media/ is left for the user to choose.
+if (!fs.existsSync(PROMO)) {
+  const t = JSON.parse(fs.readFileSync(path.join(BUILTIN_TEMPLATES, 'bk-event.json'), 'utf8'));
+  const have = (f) => f && fs.existsSync(path.join(MEDIA, f));
+  for (const c of t.clips) if (!have(c.file)) c.file = '';
+  if (t.music && !have(t.music.file)) delete t.music;
+  if (t.logo && !have(t.logo.file)) delete t.logo;
+  fs.writeFileSync(PROMO, JSON.stringify(t, null, 2));
+}
 
 const TYPES = {
   '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json',
@@ -200,7 +209,16 @@ const server = http.createServer(async (req, res) => {
   }
 });
 
+server.on('error', (e) => {
+  if (e.code === 'EADDRINUSE') {
+    console.error(`\nPort ${PORT} is already in use — most likely an older Promo Maker is still running`);
+    console.error('in another terminal window. Close that window (or press Ctrl+C in it), then run this again.');
+    console.error(`Or start this one on another port:  node promo/server.js --port ${PORT + 1}\n`);
+    process.exit(1);
+  }
+  throw e;
+});
 server.listen(PORT, '127.0.0.1', () => {
-  console.log(`Promo maker: http://localhost:${PORT}`);
+  console.log(`Promo Maker v3: http://localhost:${PORT}`);
   console.log(`Workspace:   ${WS}`);
 });
